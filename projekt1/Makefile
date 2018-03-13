@@ -1,9 +1,10 @@
-CFLAGS= -Wall -O
+CFLAGS = -Wall -O
 LIBPATH = /home/patryk/Desktop/sysopy/projekt1/libraries
+SOURCE = my_lib_test
 
 
 shared_lib:
-	gcc -I$(LIBPATH) my_lib_test.c -o my_shared_lib_test -L$(LIBPATH) -lsblocks -ldblocks -Wl,-rpath,$(LIBPATH)
+	gcc -I$(LIBPATH) $(SOURCE).c -o $(SOURCE)_shared_ver -L$(LIBPATH) -lsblocks -ldblocks -Wl,-rpath,$(LIBPATH)
 
 static_lib:
-	gcc -static -I$(LIBPATH) my_lib_test.c -o my_static_lib_test -L$(LIBPATH) -lsblocks -ldblocks
+	gcc -static -I$(LIBPATH) $(SOURCE).c -o $(SOURCE)_static_ver -L$(LIBPATH) -lsblocks -ldblocks

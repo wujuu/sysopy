@@ -17,76 +17,98 @@ int main(int argc, char** argv){
     char* alloc_type = argv[3]; //static / dynamic
     int* test_atr = calloc(3, sizeof(int));
 
+    const char* dynamic = "dynamic";
+
+    char* tmp = calloc(charsSize, sizeof(char));
+
+    for(int j = 0; j < charsSize; j++){
+        tmp[j] = 32 + rand() % 95;
+    }
+
 
      for(int i = 0; i < 3; i++){
-         indexs[i] = atoi(argv[i + 4]);
+         test_atr[i] = atoi(argv[i + 4]);
      }
      
 
     if(strcmp(alloc_type, dynamic) == 0){
 
         //measure time
-        charBlockArray* dynamicArray = makeRandCharBlockArray(blocksSize, charsSize);
+        charBlockArray* dynamicArray = initCharBlockArray(blocksSize, charsSize);
         //end measure
 
-        for(int i = 0; i<3; i++){
-            if(strcmp(actions[i], add) == 0){
-                char* tmp = calloc(charsSize, sizeof(char));
+        //NOT MEASURING for testing's sake;
+        dynamicArray = makeRandCharBlockArray(blocksSize, charsSize);
 
-                for(int j = 0; j < charsSize; j++){
-                    tmp[j] = 32 + rand() % 95;
-                }
+        //measure time
+        getMinBlock(dynamicArray, test_atr[0]);
+        //end measure
 
-                addBlock(dynamicArray, indexs[i], charsSize, tmp);
+        int i = 0;     
 
-                printf("added random blocks at %i index\n", indexs[i]);
-            }
-
-            if(strcmp(actions[i], del) == 0){
-                delBlock(dynamicArray, indexs[i]);
-                printf("delete blocks at %i index\n", indexs[i]);
-
-            }
-
-            if(strcmp(actions[i], find) == 0){
-                getMinBlock(dynamicArray, indexs[i]);
-                printf("found closest sum of chars at blocks %i\n", indexs[i]);
-            }
+        //measure time
+        while(i < test_atr[1]){
+            delBlock(dynamicArray, i);
+            i = (i+1) % blocksSize;
         }
+
+        while(i < test_atr[1]){
+            addBlock(dynamicArray, i, charsSize, tmp);
+            i = (i+1) % blocksSize;
+        }
+        //end measure
+
+        i = 0;
+
+        //start measure
+        while(i < test_atr[2]){
+            delBlock(dynamicArray, i);
+            addBlock(dynamicArray, i, charsSize, tmp);
+            i = (i+1) % blocksSize;
+        }
+        //end measure
     }
     else{
-        staticCharBlockArray staticArray = staticMakeRandCharBlockArray(blocksSize, charsSize);
+        //measure time
+        staticCharBlockArray staticArray = staticInitCharBlockArray(blocksSize, charsSize);
+        //end measure
 
-        for(int i = 0; i<3; i++){
-            if(strcmp(actions[i], add) == 0){
-                char* tmp = calloc(charsSize, sizeof(char));
+        //for testing's sake;
+        staticArray = staticMakeRandCharBlockArray(blocksSize, charsSize);
 
-                for(int j = 0; j < charsSize; j++){
-                    tmp[j] = 32 + rand() % 95;
-                }
+        //measure time
+        staticGetMinIndex(staticArray, test_atr[0]);
+        //end measure
 
-                staticAddBlock(&staticArray, indexs[i], charsSize, tmp);
+        int i = 0;     
 
-                 printf("added random blocks at %i index\n", indexs[i]);
-            }
-
-            if(strcmp(actions[i], del) == 0){
-                staticDelBlock(&staticArray, indexs[i]);
-
-                printf("delete blocks at %i index\n", indexs[i]);
-
-            }
-
-            if(strcmp(actions[i], find) == 0){
-                staticGetMinIndex(staticArray, indexs[i]);
-
-                printf("found closest sum of chars to %i at blocks\n", indexs[i]);
-            }
+        //measure time
+        while(i < test_atr[1]){
+            staticDelBlock(&staticArray, i);
+            i = (i+1) % blocksSize;
         }
 
+        while(i < test_atr[1]){
+            staticAddBlock(&staticArray, i, charsSize, tmp);
+            i = (i+1) % blocksSize;
+        }
+        //end measure
 
+        i = 0;
+
+        //start measure
+        while(i < test_atr[2]){
+            staticDelBlock(&staticArray, i);
+            staticAddBlock(&staticArray, i, charsSize, tmp);
+            i = (i+1) % blocksSize;
+        }
+        //end measure
 
     }
+
+
+
+        
 
     return 0;
 }
