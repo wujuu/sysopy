@@ -16,7 +16,9 @@ void delBlock(charBlockArray* blocks, int index){
 
     free(blocks -> blocks[index] -> chars);
 
-    free(blocks -> blocks[index]);
+    blocks -> blocks[index] -> charsSize = 0;
+
+    //free(blocks -> blocks[index]);
 }
 
 

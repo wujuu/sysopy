@@ -1,6 +1,7 @@
-CFLAGS = -Wall -O
-LIBPATH = /home/patryk/Desktop/sysopy/projekt1/libraries
-SOURCE = my_lib_test
+SOURCE=time_test
+CFLAGS=-Wall -O
+LIBPATH=/home/patryk/Desktop/sysopy/projekt1/libraries
+
 
 
 shared_lib:
