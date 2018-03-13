@@ -1,5 +1,5 @@
 CFLAGS= -Wall -O
-LIBPATH = /home/patryk/Desktop/projekt1/libraries
+LIBPATH = /home/patryk/Desktop/sysopy/projekt1/libraries
 
 
 shared_lib:
