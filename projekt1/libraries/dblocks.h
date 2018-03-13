@@ -2,8 +2,8 @@
 #ifndef DBLOCKS_H
 #define DBLOCKS_H
 
-#define MAX_BLOCKS_SIZE 100
-#define MAX_CHAR_ARRAY_SIZE 100
+#define MAX_BLOCKS_SIZE 1000
+#define MAX_CHAR_ARRAY_SIZE 1000
 
 typedef struct charBlock{
     char* chars;

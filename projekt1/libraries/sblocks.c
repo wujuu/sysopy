@@ -15,6 +15,10 @@ void staticAddBlock(staticCharBlockArray *blocks, int index, int charsSize, char
 
 
 void staticDelBlock(staticCharBlockArray *blocks, int index){
+    for(int i = 0; i < blocks -> charsSize[index]; i++){
+        blocks -> array[index][i] = ' ';
+    }
+
     blocks -> charsSize[index] = 0;
 }
 

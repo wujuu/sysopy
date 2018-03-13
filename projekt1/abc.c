@@ -1,52 +1,47 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/resource.h>
 #include "dblocks.h"
 #include "sblocks.h"
 
 
 int main(){
-    int blocksSize = 10;
-    int charsSize = 5;
+    int j = 0;
 
-    charBlockArray* dynamicArray = initCharBlockArray(blocksSize, charsSize);
+    struct rusage ru;
+    struct timeval sys_start, sys_end, user_start, user_end;
+    
+    getrusage(RUSAGE_SELF, &ru);
+    sys_start = ru.ru_stime;
+    user_start = ru.ru_utime;
 
-    dynamicArray = makeRandCharBlockArray(blocksSize, charsSize);  
-
-    printCharBlockArray(dynamicArray);
-
-    char* tmp = calloc(20, sizeof(char));
-    for(int j = 0; j < 20; j++){
-        tmp[j] = 32 + rand() % 95;
+    for(int i = 0 ; i < 1000000000; i++){
+        j = 1;
     }
 
-    
+    getrusage(RUSAGE_SELF, &ru);
+    sys_end = ru.ru_stime;
+    user_end = ru.ru_utime;
 
-    delBlock(dynamicArray, 2);
+    printf("%ld.%06ld\n", sys_end.tv_sec, sys_end.tv_usec);
+    printf("%ld.%06ld\n", user_end.tv_sec, user_end.tv_usec);
 
-    printf("\n");
+    struct rusage ru1;
 
-    printCharBlockArray(dynamicArray);
+    getrusage(RUSAGE_SELF, &ru1);
+    sys_start = ru1.ru_stime;
+    user_start = ru1.ru_utime;
 
+    for(int i = 0 ; i < 1000000000; i++){
+        j = 1;
+    }
 
-    addBlock(dynamicArray, 2, 2, tmp);
+    getrusage(RUSAGE_SELF, &ru);
+    sys_end = ru1.ru_stime;
+    user_end = ru1.ru_utime;
+    long int r = sys_end.tv_sec - sys_start.tv_sec;
 
-    printf("\n");
-
-    printCharBlockArray(dynamicArray);
-
-     delBlock(dynamicArray, 2);
-
-    printf("\n");
-
-    printCharBlockArray(dynamicArray);
-
-
-    addBlock(dynamicArray, 2, 2, tmp);
-
-    printf("\n");
-
-    printCharBlockArray(dynamicArray);
-
-
+    printf("%ld.%06ld\n", r, sys_end.tv_usec);
+    printf("%ld.%06ld\n", user_end.tv_sec, user_end.tv_usec);
 }

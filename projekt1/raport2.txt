@@ -1,0 +1,11 @@
+blocksSize = 1000 charsSize = 1000 findClosest to = 20000 del -> add times = 1000 del <-> add times = 100000
+STATIC
+sys: 0.002898, usr: 0.000000, real: 0.002898
+sys: 0.000000, usr: 0.112844, real: 0.112844
+sys: 0.000000, usr: 0.011750, real: 0.011750
+sys: 0.004009, usr: 1.163425, real: 1.167434
+DYNAMIC
+sys: 0.000000, usr: 0.000274, real: 0.000274
+sys: 0.000000, usr: 0.008479, real: 0.008479
+sys: 0.000000, usr: 0.007073, real: 0.007073
+sys: 0.011855, usr: 0.483694, real: 0.495549

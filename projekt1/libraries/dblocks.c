@@ -6,7 +6,13 @@
 
 void addBlock(charBlockArray* blocks, int index, int charsSize, char* chars){
 
-    blocks -> blocks[index] -> chars = chars;
+    char* tmp = calloc(charsSize, sizeof(char));
+
+    for(int j = 0; j < charsSize; j++){
+        tmp[j] = chars[j];
+    }
+
+    blocks -> blocks[index] -> chars = tmp;
 
     blocks -> blocks[index] -> charsSize = charsSize;
 }
