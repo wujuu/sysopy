@@ -11,14 +11,13 @@
 
 
 int main(int argc, char** argv){
-    //1000 1000 dynamic 20000 1000 100000;
+    //1000 1000 20000 1000 100000;
 
     int blocksSize = atoi(argv[1]);
     int charsSize = atoi(argv[2]);
-    char* alloc_type = argv[3]; //static / dynamic
-    int closestTo = atoi(argv[4]);
-    int times_add_del_cont = atoi(argv[5]);
-    int times_add_del_mix = atoi(argv[6]);
+    int closestTo = atoi(argv[3]);
+    int times_add_del_cont = atoi(argv[4]);
+    int times_add_del_mix = atoi(argv[5]);
 
 
     char* tmp = calloc(charsSize, sizeof(char));
@@ -30,7 +29,7 @@ int main(int argc, char** argv){
      
     const char* dynamic = "dynamic";
 
-    if(strcmp(alloc_type, dynamic) == 0){
+
         printf("DYNAMIC\n");
         struct rusage ru;
         struct timeval sys_start, sys_end, user_start, user_end;
@@ -139,25 +138,22 @@ int main(int argc, char** argv){
         real_time_end_usec = sys_end.tv_usec + user_end.tv_usec;
 
         printf("sys: %ld.%06ld, usr: %ld.%06ld, real: %ld.%06ld\n", sys_end.tv_sec - sys_start.tv_sec, sys_end.tv_usec - sys_start.tv_usec, user_end.tv_sec - user_start.tv_sec, user_end.tv_usec - user_start.tv_usec, real_time_end_sec - real_time_start_sec, real_time_end_usec - real_time_start_usec);
-    }
-    else{
+
         printf("STATIC\n");
-        struct rusage ru;
-        struct timeval sys_start, sys_end, user_start, user_end;
         
         getrusage(RUSAGE_SELF, &ru);
         sys_start = ru.ru_stime;
         user_start = ru.ru_utime;
-        long int real_time_start_sec = sys_start.tv_sec + user_start.tv_sec;
-        long int real_time_start_usec = sys_start.tv_usec + user_start.tv_usec;
+        real_time_start_sec = sys_start.tv_sec + user_start.tv_sec;
+        real_time_start_usec = sys_start.tv_usec + user_start.tv_usec;
 
         staticCharBlockArray staticArray = staticInitCharBlockArray(blocksSize, charsSize);
 
         getrusage(RUSAGE_SELF, &ru);
         sys_end = ru.ru_stime;
         user_end = ru.ru_utime;
-        long int real_time_end_sec = sys_end.tv_sec + user_end.tv_sec;
-        long int real_time_end_usec = sys_end.tv_usec + user_end.tv_usec;
+        real_time_end_sec = sys_end.tv_sec + user_end.tv_sec;
+        real_time_end_usec = sys_end.tv_usec + user_end.tv_usec;
 
         printf("sys: %ld.%06ld, usr: %ld.%06ld, real: %ld.%06ld\n", sys_end.tv_sec - sys_start.tv_sec, sys_end.tv_usec - sys_start.tv_usec, user_end.tv_sec - user_start.tv_sec, user_end.tv_usec - user_start.tv_usec, real_time_end_sec - real_time_start_sec, real_time_end_usec - real_time_start_usec);
 
@@ -167,8 +163,6 @@ int main(int argc, char** argv){
 
         //for testing's sake;
         staticArray = staticMakeRandCharBlockArray(blocksSize, charsSize);
-
-        struct rusage ru1;
 
 
 
@@ -191,9 +185,8 @@ int main(int argc, char** argv){
 
 
 
-        int i = 0;
-        int times = 0; 
-        struct rusage ru2;    
+        i = 0;
+        times = 0;    
 
 
 
@@ -234,7 +227,6 @@ int main(int argc, char** argv){
 
         i = 0;
         times = 0;
-        struct rusage ru3;
 
 
 
@@ -263,7 +255,7 @@ int main(int argc, char** argv){
         
 
 
-    }
+    
 
 
 
