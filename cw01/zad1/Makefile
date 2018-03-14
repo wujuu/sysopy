@@ -1,6 +1,10 @@
 CFLAGS = -O -Wall
 LIB = sblocks
 
+both:
+	make static
+	make shared
+
 static:
 
 	gcc -c $(LIB).c -o $(LIB).o

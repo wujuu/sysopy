@@ -1,0 +1,45 @@
+
+STATIC_LIB_STATS: 
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 1000 
+
+DYNAMIC 
+sys: 0.000000, usr: 0.000076, real: 0.000076
+sys: 0.000000, usr: 0.002757, real: 0.002757
+sys: 0.000000, usr: 0.002474, real: 0.002474
+sys: 0.002501, usr: 0.000000, real: 0.002501
+STATIC
+sys: 0.001115, usr: 0.000000, real: 0.001115
+sys: 0.000000, usr: 0.072606, real: 0.072606
+sys: 0.000000, usr: 0.007633, real: 0.007633
+sys: 0.000002, usr: 0.006759, real: 0.006761
+
+SHARED_LIB_STATS: 
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 1000 
+
+DYNAMIC 
+sys: 0.000000, usr: 0.000066, real: 0.000066
+sys: 0.000000, usr: 0.003969, real: 0.003969
+sys: 0.000000, usr: 0.002593, real: 0.002593
+sys: 0.000000, usr: 0.002580, real: 0.002580
+STATIC
+sys: 0.000000, usr: 0.001652, real: 0.001652
+sys: 0.000000, usr: 0.049303, real: 0.049303
+sys: 0.000000, usr: 0.006891, real: 0.006891
+sys: 0.000000, usr: 0.006825, real: 0.006825
+
+DYNAMIC_LIB_LOADING__STATS: 
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 1000 
+
+DYNAMIC
+sys: 0.000107, usr: 0.000000, real: 0.000107
+sys: 0.000040, usr: 0.003934, real: 0.003974
+sys: 0.000000, usr: 0.002771, real: 0.002771
+sys: 0.000337, usr: 0.002371, real: 0.002708
+STATIC
+sys: 0.001146, usr: 0.000000, real: 0.001146
+sys: 0.003684, usr: 0.054248, real: 0.057932
+sys: 0.000000, usr: 0.006840, real: 0.006840
+sys: 0.000000, usr: 0.007517, real: 0.007517

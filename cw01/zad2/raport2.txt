@@ -1,0 +1,27 @@
+\nNON_LIBRARY_COMPILATION_STATS:\n
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 10000 \n
+DYNAMIC
+sys: 0.000000, usr: 0.000063, real: 0.000063
+sys: 0.000000, usr: 0.002766, real: 0.002766
+sys: 0.000000, usr: 0.002610, real: 0.002610
+sys: 0.000000, usr: 0.026760, real: 0.026760
+STATIC
+sys: 0.000000, usr: 0.000951, real: 0.000951
+sys: 0.000000, usr: 0.051848, real: 0.051848
+sys: 0.000000, usr: 0.007192, real: 0.007192
+sys: 0.000000, usr: 0.066555, real: 0.066555
+
+NON_LIBRARY_COMPILATION_STATS:
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 10000 
+
+DYNAMIC
+sys: 0.000000, usr: 0.000064, real: 0.000064
+sys: 0.000000, usr: 0.003691, real: 0.003691
+sys: 0.000000, usr: 0.002721, real: 0.002721
+sys: 0.004173, usr: 0.022841, real: 0.027014
+STATIC
+sys: 0.000932, usr: 0.000000, real: 0.000932
+sys: 0.000111, usr: 0.050046, real: 0.050157
+sys: 0.000000, usr: 0.006452, real: 0.006452
+sys: 0.000000, usr: 0.068949, real: 0.068949

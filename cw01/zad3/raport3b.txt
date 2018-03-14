@@ -1,0 +1,225 @@
+
+GCC OPTIONS: -Wall -O, STATIC_LIB_STATS: 
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 1000 
+
+DYNAMIC 
+sys: 0.000000, usr: 0.000119, real: 0.000119
+sys: 0.000313, usr: 0.005362, real: 0.005675
+sys: 0.000023, usr: 0.004080, real: 0.004103
+sys: 0.000503, usr: 0.002767, real: 0.003270
+STATIC
+sys: 0.002065, usr: 0.000000, real: 0.002065
+sys: 0.003556, usr: 0.053446, real: 0.057002
+sys: 0.000000, usr: 0.007301, real: 0.007301
+sys: 0.000250, usr: 0.006799, real: 0.007049
+
+GCC OPTIONS: -Wall -O, SHARED_LIB_STATS: 
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 1000 
+
+DYNAMIC 
+sys: 0.000000, usr: 0.000066, real: 0.000066
+sys: 0.000000, usr: 0.002978, real: 0.002978
+sys: 0.000000, usr: 0.003251, real: 0.003251
+sys: 0.000000, usr: 0.003727, real: 0.003727
+STATIC
+sys: 0.000000, usr: 0.000920, real: 0.000920
+sys: 0.000000, usr: 0.051932, real: 0.051932
+sys: 0.000000, usr: 0.006922, real: 0.006922
+sys: 0.000000, usr: 0.006515, real: 0.006515
+
+GCC OPTIONS: -Wall -O, DYNAMIC_LOADING__STATS: 
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 1000 
+
+DYNAMIC
+sys: 0.000000, usr: 0.000068, real: 0.000068
+sys: 0.001126, usr: 0.002252, real: 0.003378
+sys: 0.000000, usr: 0.002859, real: 0.002859
+sys: 0.000729, usr: 0.002789, real: 0.003518
+STATIC
+sys: 0.000000, usr: 0.001115, real: 0.001115
+sys: 0.000000, usr: 0.051656, real: 0.051656
+sys: 0.000000, usr: 0.008306, real: 0.008306
+sys: 0.000000, usr: 0.006814, real: 0.006814
+
+GCC OPTIONS: -Wall -O0, STATIC_LIB_STATS: 
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 1000 
+
+DYNAMIC 
+sys: 0.000000, usr: 0.000051, real: 0.000051
+sys: 0.000000, usr: 0.002925, real: 0.002925
+sys: 0.000000, usr: 0.002707, real: 0.002707
+sys: 0.000000, usr: 0.002760, real: 0.002760
+STATIC
+sys: 0.000000, usr: 0.000972, real: 0.000972
+sys: 0.000357, usr: 0.054771, real: 0.055128
+sys: 0.000000, usr: 0.006909, real: 0.006909
+sys: 0.000000, usr: 0.006757, real: 0.006757
+
+GCC OPTIONS: -Wall -O0, SHARED_LIB_STATS: 
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 1000 
+
+DYNAMIC 
+sys: 0.000000, usr: 0.000069, real: 0.000069
+sys: 0.000048, usr: 0.004292, real: 0.004340
+sys: 0.000000, usr: 0.002497, real: 0.002497
+sys: 0.000000, usr: 0.002460, real: 0.002460
+STATIC
+sys: 0.000000, usr: 0.000929, real: 0.000929
+sys: 0.000024, usr: 0.050666, real: 0.050690
+sys: 0.000000, usr: 0.007182, real: 0.007182
+sys: 0.000062, usr: 0.006781, real: 0.006843
+
+GCC OPTIONS: -Wall -O0, DYNAMIC_LOADING__STATS: 
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 1000 
+
+DYNAMIC
+sys: 0.000000, usr: 0.000063, real: 0.000063
+sys: 0.000000, usr: 0.003581, real: 0.003581
+sys: 0.000000, usr: 0.003154, real: 0.003154
+sys: 0.000000, usr: 0.003080, real: 0.003080
+STATIC
+sys: 0.000000, usr: 0.000944, real: 0.000944
+sys: 0.000000, usr: 0.051119, real: 0.051119
+sys: 0.000000, usr: 0.006932, real: 0.006932
+sys: 0.000000, usr: 0.006741, real: 0.006741
+
+GCC OPTIONS: -Wall -O1, STATIC_LIB_STATS: 
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 1000 
+
+DYNAMIC 
+sys: 0.000000, usr: 0.000052, real: 0.000052
+sys: 0.000000, usr: 0.003179, real: 0.003179
+sys: 0.000000, usr: 0.002871, real: 0.002871
+sys: 0.000000, usr: 0.003270, real: 0.003270
+STATIC
+sys: 0.000000, usr: 0.000993, real: 0.000993
+sys: 0.000124, usr: 0.056778, real: 0.056902
+sys: 0.000000, usr: 0.006883, real: 0.006883
+sys: 0.000150, usr: 0.006711, real: 0.006861
+
+GCC OPTIONS: -Wall -O1, SHARED_LIB_STATS: 
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 1000 
+
+DYNAMIC 
+sys: 0.000000, usr: 0.000070, real: 0.000070
+sys: 0.000285, usr: 0.002567, real: 0.002852
+sys: 0.000000, usr: 0.002749, real: 0.002749
+sys: 0.000000, usr: 0.003416, real: 0.003416
+STATIC
+sys: 0.000000, usr: 0.000927, real: 0.000927
+sys: 0.000000, usr: 0.050574, real: 0.050574
+sys: 0.000000, usr: 0.007340, real: 0.007340
+sys: 0.000000, usr: 0.006996, real: 0.006996
+
+GCC OPTIONS: -Wall -O1, DYNAMIC_LOADING__STATS: 
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 1000 
+
+DYNAMIC
+sys: 0.000000, usr: 0.000066, real: 0.000066
+sys: 0.000000, usr: 0.002818, real: 0.002818
+sys: 0.000000, usr: 0.003431, real: 0.003431
+sys: 0.000000, usr: 0.003639, real: 0.003639
+STATIC
+sys: 0.000000, usr: 0.001001, real: 0.001001
+sys: 0.000000, usr: 0.053122, real: 0.053122
+sys: 0.000000, usr: 0.007367, real: 0.007367
+sys: 0.000000, usr: 0.006859, real: 0.006859
+
+GCC OPTIONS: -Wall -O2, STATIC_LIB_STATS: 
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 1000 
+
+DYNAMIC 
+sys: 0.000000, usr: 0.000053, real: 0.000053
+sys: 0.000614, usr: 0.002454, real: 0.003068
+sys: 0.000000, usr: 0.003852, real: 0.003852
+sys: 0.000000, usr: 0.004707, real: 0.004707
+STATIC
+sys: 0.000000, usr: 0.001637, real: 0.001637
+sys: 0.000000, usr: 0.062177, real: 0.062177
+sys: 0.000000, usr: 0.007280, real: 0.007280
+sys: 0.000026, usr: 0.006357, real: 0.006383
+
+GCC OPTIONS: -Wall -O2, SHARED_LIB_STATS: 
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 1000 
+
+DYNAMIC 
+sys: 0.000000, usr: 0.000070, real: 0.000070
+sys: 0.000000, usr: 0.003901, real: 0.003901
+sys: 0.000000, usr: 0.002894, real: 0.002894
+sys: 0.000000, usr: 0.003352, real: 0.003352
+STATIC
+sys: 0.000000, usr: 0.002187, real: 0.002187
+sys: 0.003908, usr: 0.044928, real: 0.048836
+sys: 0.000076, usr: 0.006644, real: 0.006720
+sys: 0.000000, usr: 0.006494, real: 0.006494
+
+GCC OPTIONS: -Wall -O2, DYNAMIC_LOADING__STATS: 
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 1000 
+
+DYNAMIC
+sys: 0.000000, usr: 0.000066, real: 0.000066
+sys: 0.000319, usr: 0.003194, real: 0.003513
+sys: 0.000245, usr: 0.002447, real: 0.002692
+sys: 0.000000, usr: 0.002440, real: 0.002440
+STATIC
+sys: 0.000000, usr: 0.000986, real: 0.000986
+sys: 0.003705, usr: 0.045910, real: 0.049615
+sys: 0.000000, usr: 0.006966, real: 0.006966
+sys: 0.000068, usr: 0.006434, real: 0.006502
+
+GCC OPTIONS: -Wall -Os, STATIC_LIB_STATS: 
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 1000 
+
+DYNAMIC 
+sys: 0.000000, usr: 0.000133, real: 0.000133
+sys: 0.000000, usr: 0.004087, real: 0.004087
+sys: 0.000000, usr: 0.004930, real: 0.004930
+sys: 0.000000, usr: 0.002936, real: 0.002936
+STATIC
+sys: 0.001788, usr: 0.000000, real: 0.001788
+sys: 0.000382, usr: 0.057904, real: 0.058286
+sys: 0.000000, usr: 0.007015, real: 0.007015
+sys: 0.000000, usr: 0.006943, real: 0.006943
+
+GCC OPTIONS: -Wall -Os, SHARED_LIB_STATS: 
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 1000 
+
+DYNAMIC 
+sys: 0.000000, usr: 0.000131, real: 0.000131
+sys: 0.000000, usr: 0.002826, real: 0.002826
+sys: 0.000147, usr: 0.002486, real: 0.002633
+sys: 0.000031, usr: 0.003991, real: 0.004022
+STATIC
+sys: 0.000000, usr: 0.000925, real: 0.000925
+sys: 0.000271, usr: 0.052620, real: 0.052891
+sys: 0.000000, usr: 0.006893, real: 0.006893
+sys: 0.000000, usr: 0.007039, real: 0.007039
+
+GCC OPTIONS: -Wall -Os, DYNAMIC_LOADING__STATS: 
+
+blocksSize, charsSize, closestTo, del -> add, del <-> add = 1000 1000 20000 1000 1000 
+
+DYNAMIC
+sys: 0.000000, usr: 0.000102, real: 0.000102
+sys: 0.000000, usr: 0.002939, real: 0.002939
+sys: 0.000000, usr: 0.002957, real: 0.002957
+sys: 0.000000, usr: 0.002464, real: 0.002464
+STATIC
+sys: 0.000000, usr: 0.001010, real: 0.001010
+sys: 0.003955, usr: 0.052337, real: 0.056292
+sys: 0.000086, usr: 0.007309, real: 0.007395
+sys: 0.000000, usr: 0.006678, real: 0.006678
