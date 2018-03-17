@@ -18,7 +18,7 @@ void fill_random(char *to_fill, int size){
     int i = 0;
 
     for(i = 0; i < size - 1; i++){
-        to_fill[i] = 32 + rand() % 95;
+        to_fill[i] = 97 + rand() % 26;
     }
 
     to_fill[size - 1] = 10;
@@ -41,16 +41,16 @@ void generate(const char *file_name, int records, int bytes){
     strcpy(file_path, "./");
     strcat(file_path, file_name);
 
-    int fd = open(file_path, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR), i = 0;
+    int fd = open(file_path, O_WRONLY | O_CREAT | O_EXCL | O_APPEND, S_IRUSR | S_IWUSR), i = 0;
 
     if(fd == -1){
-        err_sys("Open file failed!");
+        err_sys("Create file failed!");
     }
 
     for(i = 0; i < records; i++){
-        char* w_buf = get_random(bytes);
+        char *w_buff = get_random(bytes);
 
-        if((write(fd, w_buf, bytes)) == -1){
+        if((write(fd, w_buff, bytes)) == -1){
             err_sys("Write to file failed!");
         }
     }
@@ -59,30 +59,106 @@ void generate(const char *file_name, int records, int bytes){
 }
 
 
-int main(){
+void sort(const char *file_name, int records, int bytes, int sys){
+    char file_path[256];
+    strcpy(file_path, "./");
+    strcat(file_path, file_name);
+
+
+
+    int fd = open(file_path, O_RDWR), processed_index, processed_key, tmp_key, i;
+    char processed_buff[bytes], tmp_buff[bytes];
+
+    if(fd == -1){
+        err_sys("Open file failed!");
+    }
+
+
+    for(processed_index = 1; processed_index < records; processed_index++){
+
+        lseek(fd, processed_index * bytes, SEEK_SET);
+
+        read(fd, processed_buff, bytes);
+
+        processed_key = processed_buff[0];
+
+        lseek(fd, 0, SEEK_SET);
+        int start_index = -1;
+
+        do{
+            read(fd, tmp_buff, bytes);
+            tmp_key = tmp_buff[0];
+            start_index++;
+        }
+        while(tmp_key <= processed_key && start_index < processed_index);
+
+        for(i = processed_index - 1; i >= start_index; i--){
+            lseek(fd, i * bytes, SEEK_SET);
+            read(fd, tmp_buff, bytes);
+            write(fd, tmp_buff, bytes);
+
+        }
+
+        lseek(fd, start_index * bytes, SEEK_SET);
+    
+        write(fd, processed_buff, bytes);
+    }
+
+
+    close(fd);
+}
+
+
+
+int main(int argc, const char **argv){
     srand(time(NULL));
 
-    // char r_buf[BUFF_SIZE];
-    // char w_buf[BUFF_SIZE];
+    int records, bytes;
+    const char* sys = "sys";
+    const char *lib = "lib";
 
-    // fill_random(w_buf, BUFF_SIZE);
+    if(argc < 5 || argc > 7){
+        err_sys("Wrong number of arguments!");
+    }
 
-    // int fd = open("./test_file.txt", O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR), i = 0, b_read, b_writt;
+    if(strcmp(argv[1], "generate") == 0){
 
+        if((records = atoi(argv[3])) <= 0){
+            err_sys("Wrong records size!");
+        }
 
-    // // if((b_read = read(fd, r_buf, BUFF_SIZE)) == -1){
-    // //     err_sys("Read from file failed!");
-    // // }
+        if((bytes = atoi(argv[4])) <= 0){
+            err_sys("Wrong bytes size!");
+        }
 
+        generate(argv[2], records, bytes);
+    }
+    else if (strcmp(argv[1], "sort") == 0){
 
-    // if((b_writt = write(fd, w_buf, BUFF_SIZE)) == -1){
-    //     err_sys("Write to file failed!");
-    // }
+        if((records = atoi(argv[3])) <= 0){
+            err_sys("Wrong records size!");
+        }
 
+        if((bytes = atoi(argv[4])) <= 0){
+            err_sys("Wrong bytes size!");
+        }
 
-    // close(fd);
+        if(strcmp(argv[5], sys) == 0){
+            sort(argv[2], records, bytes, 0);
+        }
+        else if (strcmp(argv[5], lib) == 0){
+            sort(argv[2], records, bytes, 1);
+        }
+        else{
+            err_sys("Wrong implementation option!");
+        }
 
-    generate("name2", 100, 512);
+    }else if (strcmp(argv[1], "copy") == 0){
+
+    }else{
+        err_sys("Wrong action!");
+    }
+
 
     return 0;
 }
