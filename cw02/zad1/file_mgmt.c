@@ -35,9 +35,7 @@ char *get_random(int size){
 
 
 void generate(const char *file_name, int records, int bytes){
-
     char file_path[256];
-
     strcpy(file_path, "./");
     strcat(file_path, file_name);
 
@@ -59,7 +57,7 @@ void generate(const char *file_name, int records, int bytes){
 }
 
 
-void sort(const char *file_name, int records, int bytes, int sys){
+void sort(const char *file_name, int records, int bytes, int if_sys){
     char file_path[256];
     strcpy(file_path, "./");
     strcat(file_path, file_name);
@@ -109,6 +107,44 @@ void sort(const char *file_name, int records, int bytes, int sys){
 }
 
 
+void copy(const char *orig_file_name, const char* new_file_name, int records, int bytes, int if_sys){
+    char orig_file_path[256];
+    strcpy(orig_file_path, "./");
+    strcat(orig_file_path, orig_file_name);
+
+    char new_file_path[256];
+    strcpy(new_file_path, "./");
+    strcat(new_file_path, new_file_name);
+
+    int orig_fd = open(orig_file_path, O_RDONLY), new_fd = open(new_file_path, O_WRONLY | O_CREAT | O_EXCL | O_APPEND, S_IRUSR | S_IWUSR), i;
+
+    char buff[bytes];
+
+    if(orig_fd == -1){
+        err_sys("Can't open original file!");
+    }
+
+    if(new_fd == -1){
+        err_sys("Create new file failed!");
+    }
+
+    for(i = 0; i < records; i++){
+        if(read(orig_fd, buff, bytes) == -1){
+            err_sys("Read file failed!");
+        }
+
+        if(write(new_fd, buff, bytes) == -1){
+            err_sys("Write file failed!");
+        }
+    }
+
+
+
+    close(orig_fd);
+    close(new_fd);
+}
+
+
 
 int main(int argc, const char **argv){
     srand(time(NULL));
@@ -117,11 +153,11 @@ int main(int argc, const char **argv){
     const char* sys = "sys";
     const char *lib = "lib";
 
-    if(argc < 5 || argc > 7){
-        err_sys("Wrong number of arguments!");
-    }
-
     if(strcmp(argv[1], "generate") == 0){
+
+        if(argc != 5){
+            err_sys("Wrong number of arguments!");
+        }
 
         if((records = atoi(argv[3])) <= 0){
             err_sys("Wrong records size!");
@@ -135,6 +171,10 @@ int main(int argc, const char **argv){
     }
     else if (strcmp(argv[1], "sort") == 0){
 
+        if(argc != 6){
+            err_sys("Wrong number of arguments!");
+        }
+
         if((records = atoi(argv[3])) <= 0){
             err_sys("Wrong records size!");
         }
@@ -143,19 +183,47 @@ int main(int argc, const char **argv){
             err_sys("Wrong bytes size!");
         }
 
-        if(strcmp(argv[5], sys) == 0){
+        if(strcmp(argv[5], lib) == 0){
             sort(argv[2], records, bytes, 0);
         }
-        else if (strcmp(argv[5], lib) == 0){
+        else if (strcmp(argv[5], sys) == 0){
             sort(argv[2], records, bytes, 1);
         }
         else{
             err_sys("Wrong implementation option!");
         }
 
-    }else if (strcmp(argv[1], "copy") == 0){
+    }
+    else if (strcmp(argv[1], "copy") == 0){
 
-    }else{
+        if(argc != 7){
+            err_sys("Wrong number of arguments!");
+        }
+
+        if( access( argv[2], F_OK ) == -1 ) {
+            err_sys("This file doesn't exist!");
+        }
+
+        if((records = atoi(argv[4])) <= 0){
+            err_sys("Wrong records size!");
+        }
+
+        if((bytes = atoi(argv[5])) <= 0){
+            err_sys("Wrong bytes size!");
+        }
+
+        if(strcmp(argv[6], lib) == 0){
+            copy(argv[2], argv[3], records, bytes, 0);
+        }
+        else if (strcmp(argv[6], sys) == 0){
+            copy(argv[2], argv[3], records, bytes, 1);
+        }
+        else{
+            err_sys("Wrong implementation option!");
+        }
+
+    }
+    else{
         err_sys("Wrong action!");
     }
 
