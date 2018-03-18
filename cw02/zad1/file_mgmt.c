@@ -67,6 +67,7 @@ void sort(const char *file_name, int records, int bytes, int if_sys){
     char processed_buff[bytes], tmp_buff[bytes];
 
     if(if_sys){
+	printf("Using system libraries!");
         int fd = open(file_path, O_RDWR);
 
         if(fd == -1){
@@ -106,6 +107,7 @@ void sort(const char *file_name, int records, int bytes, int if_sys){
         close(fd);
     }
     else{
+	printf("Using C libraries!");
         FILE *file = fopen(file_path, "r+");
 
         if(file == NULL){
@@ -160,9 +162,10 @@ void copy(const char *orig_file_name, const char* new_file_name, int records, in
 
     char buff[bytes];
 
-    if(if_sys){ 
-        int orig_fd = open(orig_file_path, O_RDONLY), 
-        int new_fd = open(new_file_path, O_WRONLY | O_CREAT | O_EXCL | O_APPEND, S_IRUSR | S_IWUSR), 
+    if(if_sys){
+	printf("Using system libraries!"); 
+        int orig_fd = open(orig_file_path, O_RDONLY); 
+        int new_fd = open(new_file_path, O_WRONLY | O_CREAT | O_EXCL | O_APPEND, S_IRUSR | S_IWUSR); 
 
 
         if(orig_fd == -1){
@@ -189,6 +192,7 @@ void copy(const char *orig_file_name, const char* new_file_name, int records, in
         close(new_fd);
     }
     else{
+	printf("Using C libraries!");
         FILE *orig_file = fopen(orig_file_path, "r");
 
         if(orig_file == NULL){
@@ -201,7 +205,7 @@ void copy(const char *orig_file_name, const char* new_file_name, int records, in
             err_sys("New open file failed!");
         }
 
-        for(i = 0; i < records, i++){
+        for(i = 0; i < records; i++){
             if(fread(buff, sizeof(char), bytes, orig_file) != bytes){
                 err_sys("Read from file failed!");
             }
