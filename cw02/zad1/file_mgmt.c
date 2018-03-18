@@ -62,48 +62,88 @@ void sort(const char *file_name, int records, int bytes, int if_sys){
     strcpy(file_path, "./");
     strcat(file_path, file_name);
 
+    int processed_index, processed_key, tmp_key, i;
 
-
-    int fd = open(file_path, O_RDWR), processed_index, processed_key, tmp_key, i;
     char processed_buff[bytes], tmp_buff[bytes];
 
-    if(fd == -1){
-        err_sys("Open file failed!");
-    }
+    if(if_sys){
+        int fd = open(file_path, O_RDWR);
 
-
-    for(processed_index = 1; processed_index < records; processed_index++){
-
-        lseek(fd, processed_index * bytes, SEEK_SET);
-
-        read(fd, processed_buff, bytes);
-
-        processed_key = processed_buff[0];
-
-        lseek(fd, 0, SEEK_SET);
-        int start_index = -1;
-
-        do{
-            read(fd, tmp_buff, bytes);
-            tmp_key = tmp_buff[0];
-            start_index++;
-        }
-        while(tmp_key <= processed_key && start_index < processed_index);
-
-        for(i = processed_index - 1; i >= start_index; i--){
-            lseek(fd, i * bytes, SEEK_SET);
-            read(fd, tmp_buff, bytes);
-            write(fd, tmp_buff, bytes);
-
+        if(fd == -1){
+            err_sys("Open file failed!");
         }
 
-        lseek(fd, start_index * bytes, SEEK_SET);
-    
-        write(fd, processed_buff, bytes);
+        for(processed_index = 1; processed_index < records; processed_index++){
+
+            lseek(fd, processed_index * bytes, SEEK_SET);
+
+            read(fd, processed_buff, bytes);
+
+            processed_key = processed_buff[0];
+
+            lseek(fd, 0, SEEK_SET);
+            int start_index = -1;
+
+            do{
+                read(fd, tmp_buff, bytes);
+                tmp_key = tmp_buff[0];
+                start_index++;
+            }
+            while(tmp_key <= processed_key && start_index < processed_index);
+
+            for(i = processed_index - 1; i >= start_index; i--){
+                lseek(fd, i * bytes, SEEK_SET);
+                read(fd, tmp_buff, bytes);
+                write(fd, tmp_buff, bytes);
+
+            }
+
+            lseek(fd, start_index * bytes, SEEK_SET);
+        
+            write(fd, processed_buff, bytes);
+        }
+
+        close(fd);
     }
+    else{
+        FILE *file = fopen(file_path, "r+");
 
+        if(file == NULL){
+            err_sys("Open file failed!");
+        }
 
-    close(fd);
+        for(processed_index = 1; processed_index < records; processed_index++){
+
+            fseek(file, processed_index * bytes, 0);
+
+            fread(processed_buff, sizeof(char), bytes, file);
+
+            processed_key = processed_buff[0];
+
+            fseek(file, 0, 0);
+            int start_index = -1;
+
+            do{
+                fread(tmp_buff, sizeof(char), bytes, file);
+                tmp_key = tmp_buff[0];
+                start_index++;
+            }
+            while(tmp_key <= processed_key && start_index < processed_index);
+
+            for(i = processed_index - 1; i >= start_index; i--){
+                fseek(file, i * bytes, 0);
+                fread(tmp_buff, sizeof(char), bytes, file);
+                fwrite(tmp_buff, sizeof(char), bytes, file);
+
+            }
+
+            fseek(file, start_index * bytes, 0);
+        
+            fwrite(processed_buff, sizeof(char), bytes, file);
+        }
+
+        fclose(file);
+    }
 }
 
 
@@ -116,32 +156,65 @@ void copy(const char *orig_file_name, const char* new_file_name, int records, in
     strcpy(new_file_path, "./");
     strcat(new_file_path, new_file_name);
 
-    int orig_fd = open(orig_file_path, O_RDONLY), new_fd = open(new_file_path, O_WRONLY | O_CREAT | O_EXCL | O_APPEND, S_IRUSR | S_IWUSR), i;
+    int i;
 
     char buff[bytes];
 
-    if(orig_fd == -1){
-        err_sys("Can't open original file!");
-    }
+    if(if_sys){ 
+        int orig_fd = open(orig_file_path, O_RDONLY), 
+        int new_fd = open(new_file_path, O_WRONLY | O_CREAT | O_EXCL | O_APPEND, S_IRUSR | S_IWUSR), 
 
-    if(new_fd == -1){
-        err_sys("Create new file failed!");
-    }
 
-    for(i = 0; i < records; i++){
-        if(read(orig_fd, buff, bytes) == -1){
-            err_sys("Read file failed!");
+        if(orig_fd == -1){
+            err_sys("Can't open original file!");
         }
 
-        if(write(new_fd, buff, bytes) == -1){
-            err_sys("Write file failed!");
+        if(new_fd == -1){
+            err_sys("Create new file failed!");
         }
+
+        for(i = 0; i < records; i++){
+            if(read(orig_fd, buff, bytes) != bytes){
+                err_sys("Read file failed!");
+            }
+
+            if(write(new_fd, buff, bytes) != bytes){
+                err_sys("Write file failed!");
+            }
+        }
+
+
+
+        close(orig_fd);
+        close(new_fd);
     }
+    else{
+        FILE *orig_file = fopen(orig_file_path, "r");
 
+        if(orig_file == NULL){
+            err_sys("Original open file failed!");
+        }
 
+        FILE *new_file = fopen(new_file_path, "w");
 
-    close(orig_fd);
-    close(new_fd);
+        if(new_file == NULL){
+            err_sys("New open file failed!");
+        }
+
+        for(i = 0; i < records, i++){
+            if(fread(buff, sizeof(char), bytes, orig_file) != bytes){
+                err_sys("Read from file failed!");
+            }
+            if(fwrite(buff, sizeof(char), bytes, new_file) != bytes){
+                err_sys("Write from file failed!");
+            }
+                    
+        }
+
+        fclose(orig_file);
+        fclose(new_file);
+
+    }
 }
 
 
