@@ -69,7 +69,7 @@ void explore_dir(const char *dir_name, int comp_mode, time_t comp_date){
             
             struct stat file_stat; 
 
-            stat(abs_path, &file_stat);
+            lstat(abs_path, &file_stat);
 
             if(S_ISDIR(file_stat.st_mode)){
                 explore_dir(abs_path, comp_mode, comp_date);
@@ -99,9 +99,53 @@ void explore_dir(const char *dir_name, int comp_mode, time_t comp_date){
 
 
 int main(int argc, char **argv){
-// -1 2017 3 15 5 50 50
+// ./a.out /home/patryk/Desktop/sysopy -1 2018 3 18 18 50 50
+
     struct tm tm_time;
-    //time_t raw_time;
+    time_t raw_time;
+
+    if(argc != 9){
+        err_sys("Wrong number of agruments!");
+    }
+
+    char* dir_name = argv[1];
+
+    if(argv[1][0] != '/'){
+        char cwd[1024];
+        getcwd(cwd, sizeof(cwd));
+        strcat(cwd, "/");
+        strcat(cwd, dir_name);
+        dir_name = cwd;
+    }
+
+
+    if(atoi(argv[2]) < -1 || atoi(argv[2]) > 1){
+        err_sys("Wrong comparison mode!");
+    }
+
+    if(atoi(argv[3]) < 1900){
+        err_sys("Wrong year!");
+    }
+
+    if(atoi(argv[4]) < 1 || atoi(argv[4]) > 12){
+        err_sys("Wrong month!");
+    }
+
+    if(atoi(argv[5]) < 1 || atoi(argv[5]) > 31){
+        err_sys("Wrong day!");
+    }
+
+    if(atoi(argv[6]) < 0 || atoi(argv[6]) > 23){
+        err_sys("Wrong hour!");
+    }
+
+    if(atoi(argv[7]) < 0 || atoi(argv[7]) > 59){
+        err_sys("Wrong minute!");
+    }
+
+    if(atoi(argv[8]) < 0 || atoi(argv[8]) > 59){
+        err_sys("Wrong second!");
+    }
 
     tm_time.tm_year = atoi(argv[3]) - 1900;
     tm_time.tm_mon = atoi(argv[4]) - 1;
@@ -111,7 +155,9 @@ int main(int argc, char **argv){
     tm_time.tm_sec = atoi(argv[8]);
     tm_time.tm_isdst = 0;
 
-    explore_dir(argv[1], atoi(argv[2]), mktime(&tm_time));
+    raw_time = mktime(&tm_time);
+
+    explore_dir(dir_name, atoi(argv[2]), raw_time);
 
     return 0;
 }
