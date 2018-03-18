@@ -1,0 +1,216 @@
+Time stats for 4 bytes, 1000 records file:
+
+Copying using system libraries:
+
+real	0m0.009s
+user	0m0.000s
+sys	0m0.009s
+
+Copying using C libraries:
+
+real	0m0.004s
+user	0m0.003s
+sys	0m0.001s
+
+Sorting using system libraries:
+
+real	0m0.899s
+user	0m0.071s
+sys	0m0.817s
+
+Sorting using C libraries:
+
+real	0m0.928s
+user	0m0.124s
+sys	0m0.803s
+
+
+Time stats for 4 bytes, 10000 records file:
+
+Copying using system libraries:
+
+real	0m0.051s
+user	0m0.000s
+sys	0m0.045s
+
+Copying using C libraries:
+
+real	0m0.003s
+user	0m0.000s
+sys	0m0.003s
+
+Sorting using system libraries:
+
+real	1m28.092s
+user	0m4.993s
+sys	1m22.947s
+
+Sorting using C libraries:
+
+real	1m49.900s
+user	0m17.304s
+sys	1m32.471s
+
+
+Time stats for 512 bytes, 1000 records file:
+
+Copying using system libraries:
+
+real	0m0.006s
+user	0m0.003s
+sys	0m0.003s
+
+Copying using C libraries:
+
+real	0m0.004s
+user	0m0.000s
+sys	0m0.004s
+
+Sorting using system libraries:
+
+real	0m1.073s
+user	0m0.080s
+sys	0m0.992s
+
+Sorting using C libraries:
+
+real	0m1.588s
+user	0m0.351s
+sys	0m1.235s
+
+
+Time stats for 512 bytes, 10000 records file:
+
+Copying using system libraries:
+
+real	0m0.045s
+user	0m0.008s
+sys	0m0.037s
+
+Copying using C libraries:
+
+real	0m0.031s
+user	0m0.012s
+sys	0m0.017s
+
+Sorting using system libraries:
+
+real	1m50.825s
+user	0m5.762s
+sys	1m44.691s
+
+Sorting using C libraries:
+
+real	2m3.439s
+user	0m26.390s
+sys	1m36.888s
+
+
+Time stats for 4096 bytes, 1000 records file:
+
+Copying using system libraries:
+
+real	0m0.008s
+user	0m0.000s
+sys	0m0.008s
+
+Copying using C libraries:
+
+real	0m0.011s
+user	0m0.000s
+sys	0m0.012s
+
+Sorting using system libraries:
+
+real	0m1.642s
+user	0m0.092s
+sys	0m1.549s
+
+Sorting using C libraries:
+
+real	0m1.521s
+user	0m0.140s
+sys	0m1.379s
+
+
+Time stats for 4096 bytes, 10000 records file:
+
+Copying using system libraries:
+
+real	0m0.086s
+user	0m0.000s
+sys	0m0.086s
+
+Copying using C libraries:
+
+real	0m0.118s
+user	0m0.000s
+sys	0m0.118s
+
+Sorting using system libraries:
+
+real	2m29.312s
+user	0m5.455s
+sys	2m23.459s
+
+Sorting using C libraries:
+
+real	2m17.350s
+user	0m12.722s
+sys	2m3.636s
+
+
+Time stats for 8192 bytes, 1000 records file:
+
+Copying using system libraries:
+
+real	0m0.020s
+user	0m0.000s
+sys	0m0.021s
+
+Copying using C libraries:
+
+real	0m0.041s
+user	0m0.000s
+sys	0m0.041s
+
+Sorting using system libraries:
+
+real	0m2.434s
+user	0m0.060s
+sys	0m2.361s
+
+Sorting using C libraries:
+
+real	0m2.515s
+user	0m0.144s
+sys	0m2.368s
+
+
+Time stats for 8192 bytes, 10000 records file:
+
+Copying using system libraries:
+
+real	0m0.141s
+user	0m0.004s
+sys	0m0.137s
+
+Copying using C libraries:
+
+real	0m0.669s
+user	0m0.004s
+sys	0m0.637s
+
+Sorting using system libraries:
+
+real	4m6.322s
+user	0m5.453s
+sys	3m59.716s
+
+Sorting using C libraries:
+
+real	4m25.722s
+user	0m18.386s
+sys	4m3.820s
+
+

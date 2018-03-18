@@ -220,7 +220,7 @@ void copy(const char *orig_file_name, const char* new_file_name, int records, in
             err_sys("Open orignal file failed!");
         }
 
-        FILE *new_file = fopen(new_file_path, "w");
+        FILE *new_file = fopen(new_file_path, "a+");
 
         if(new_file == NULL){
             err_sys("Open new file failed!");
