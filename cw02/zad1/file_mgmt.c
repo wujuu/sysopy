@@ -77,7 +77,7 @@ void sort(const char *file_name, int records, int bytes, int if_sys){
 
             lseek(fd, processed_index * bytes, SEEK_SET);
 
-            if(read(fd, processed_buff, bytes) != bytes){
+            if(read(fd, processed_buff, bytes) == -1){
                 err_sys("Read from file failed!");
             }
 
@@ -87,7 +87,7 @@ void sort(const char *file_name, int records, int bytes, int if_sys){
             int start_index = -1;
 
             do{
-                if(read(fd, tmp_buff, bytes) != bytes){
+                if(read(fd, tmp_buff, bytes) == -1){
                     err_sys("Read from file failed!");
                 }
 
@@ -99,11 +99,11 @@ void sort(const char *file_name, int records, int bytes, int if_sys){
             for(i = processed_index - 1; i >= start_index; i--){
                 lseek(fd, i * bytes, SEEK_SET);
 
-                if(read(fd, tmp_buff, bytes) != bytes){
+                if(read(fd, tmp_buff, bytes) == -1){
                     err_sys("Read from file failed!");
                 }
 
-                if(write(fd, tmp_buff, bytes) != bytes){
+                if(write(fd, tmp_buff, bytes) == -1){
                     err_sys("Write to file failed!");
                 }
 
@@ -111,7 +111,7 @@ void sort(const char *file_name, int records, int bytes, int if_sys){
 
             lseek(fd, start_index * bytes, SEEK_SET);
         
-            if(write(fd, processed_buff, bytes) != bytes){
+            if(write(fd, processed_buff, bytes) == -1){
                 err_sys("Write to file failed!");
             }
         }
@@ -129,7 +129,7 @@ void sort(const char *file_name, int records, int bytes, int if_sys){
 
             fseek(file, processed_index * bytes, 0);
 
-            if(fread(processed_buff, sizeof(char), bytes, file) != bytes){
+            if(fread(processed_buff, sizeof(char), bytes, file) == -1){
                 err_sys("Read from file failed!");
             }
 
@@ -139,7 +139,7 @@ void sort(const char *file_name, int records, int bytes, int if_sys){
             int start_index = -1;
 
             do{
-                if(fread(tmp_buff, sizeof(char), bytes, file) != bytes){
+                if(fread(tmp_buff, sizeof(char), bytes, file) == -1){
                     err_sys("Read from file failed!");
                 }
                 tmp_key = tmp_buff[0];
@@ -150,11 +150,11 @@ void sort(const char *file_name, int records, int bytes, int if_sys){
             for(i = processed_index - 1; i >= start_index; i--){
                 fseek(file, i * bytes, 0);
 
-                if(fread(tmp_buff, sizeof(char), bytes, file) != bytes){
+                if(fread(tmp_buff, sizeof(char), bytes, file) == -1){
                     err_sys("Read from file failed!");
                 }
 
-                if(fwrite(tmp_buff, sizeof(char), bytes, file) != bytes){
+                if(fwrite(tmp_buff, sizeof(char), bytes, file) == -1){
                     err_sys("Write to file failed!");
                 }
 
@@ -162,7 +162,7 @@ void sort(const char *file_name, int records, int bytes, int if_sys){
 
             fseek(file, start_index * bytes, 0);
         
-            if(fwrite(processed_buff, sizeof(char), bytes, file) != bytes){
+            if(fwrite(processed_buff, sizeof(char), bytes, file) == -1){
                 err_sys("Write to file failed!");
             }
         }
@@ -199,11 +199,11 @@ void copy(const char *orig_file_name, const char* new_file_name, int records, in
         }
 
         for(i = 0; i < records; i++){
-            if(read(orig_fd, buff, bytes) != bytes){
+            if(read(orig_fd, buff, bytes) == -1){
                 err_sys("Read from file failed!");
             }
 
-            if(write(new_fd, buff, bytes) != bytes){
+            if(write(new_fd, buff, bytes) == -1){
                 err_sys("Write to file failed!");
             }
         }
@@ -227,10 +227,10 @@ void copy(const char *orig_file_name, const char* new_file_name, int records, in
         }
 
         for(i = 0; i < records; i++){
-            if(fread(buff, sizeof(char), bytes, orig_file) != bytes){
+            if(fread(buff, sizeof(char), bytes, orig_file) == -1){
                 err_sys("Read from file failed!");
             }
-            if(fwrite(buff, sizeof(char), bytes, new_file) != bytes){
+            if(fwrite(buff, sizeof(char), bytes, new_file) == -1){
                 err_sys("Write from file failed!");
             }
                     
