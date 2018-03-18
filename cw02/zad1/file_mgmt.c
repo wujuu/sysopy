@@ -4,8 +4,8 @@
 #include <unistd.h>
 #include <time.h>
 #include <string.h>
+#include "file_mgmt.h"
 
-const int BUFF_SIZE = 12;
 
 void err_sys(const char *x) 
 { 
@@ -39,7 +39,7 @@ void generate(const char *file_name, int records, int bytes){
     strcpy(file_path, "./");
     strcat(file_path, file_name);
 
-    int fd = open(file_path, O_WRONLY | O_CREAT | O_EXCL | O_APPEND, S_IRUSR | S_IWUSR), i = 0;
+    int fd = open(file_path, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR), i = 0;
 
     if(fd == -1){
         err_sys("Create file failed!");
@@ -67,7 +67,6 @@ void sort(const char *file_name, int records, int bytes, int if_sys){
     char processed_buff[bytes], tmp_buff[bytes];
 
     if(if_sys){
-	printf("Using system libraries!");
         int fd = open(file_path, O_RDWR);
 
         if(fd == -1){
@@ -78,7 +77,9 @@ void sort(const char *file_name, int records, int bytes, int if_sys){
 
             lseek(fd, processed_index * bytes, SEEK_SET);
 
-            read(fd, processed_buff, bytes);
+            if(read(fd, processed_buff, bytes) != bytes){
+                err_sys("Read from file failed!");
+            }
 
             processed_key = processed_buff[0];
 
@@ -86,7 +87,10 @@ void sort(const char *file_name, int records, int bytes, int if_sys){
             int start_index = -1;
 
             do{
-                read(fd, tmp_buff, bytes);
+                if(read(fd, tmp_buff, bytes) != bytes){
+                    err_sys("Read from file failed!");
+                }
+
                 tmp_key = tmp_buff[0];
                 start_index++;
             }
@@ -94,20 +98,27 @@ void sort(const char *file_name, int records, int bytes, int if_sys){
 
             for(i = processed_index - 1; i >= start_index; i--){
                 lseek(fd, i * bytes, SEEK_SET);
-                read(fd, tmp_buff, bytes);
-                write(fd, tmp_buff, bytes);
+
+                if(read(fd, tmp_buff, bytes) != bytes){
+                    err_sys("Read from file failed!");
+                }
+
+                if(write(fd, tmp_buff, bytes) != bytes){
+                    err_sys("Write to file failed!");
+                }
 
             }
 
             lseek(fd, start_index * bytes, SEEK_SET);
         
-            write(fd, processed_buff, bytes);
+            if(write(fd, processed_buff, bytes) != bytes){
+                err_sys("Write to file failed!");
+            }
         }
 
         close(fd);
     }
     else{
-	printf("Using C libraries!");
         FILE *file = fopen(file_path, "r+");
 
         if(file == NULL){
@@ -118,7 +129,9 @@ void sort(const char *file_name, int records, int bytes, int if_sys){
 
             fseek(file, processed_index * bytes, 0);
 
-            fread(processed_buff, sizeof(char), bytes, file);
+            if(fread(processed_buff, sizeof(char), bytes, file) != bytes){
+                err_sys("Read from file failed!");
+            }
 
             processed_key = processed_buff[0];
 
@@ -126,7 +139,9 @@ void sort(const char *file_name, int records, int bytes, int if_sys){
             int start_index = -1;
 
             do{
-                fread(tmp_buff, sizeof(char), bytes, file);
+                if(fread(tmp_buff, sizeof(char), bytes, file) != bytes){
+                    err_sys("Read from file failed!");
+                }
                 tmp_key = tmp_buff[0];
                 start_index++;
             }
@@ -134,14 +149,22 @@ void sort(const char *file_name, int records, int bytes, int if_sys){
 
             for(i = processed_index - 1; i >= start_index; i--){
                 fseek(file, i * bytes, 0);
-                fread(tmp_buff, sizeof(char), bytes, file);
-                fwrite(tmp_buff, sizeof(char), bytes, file);
+
+                if(fread(tmp_buff, sizeof(char), bytes, file) != bytes){
+                    err_sys("Read from file failed!");
+                }
+
+                if(fwrite(tmp_buff, sizeof(char), bytes, file) != bytes){
+                    err_sys("Write to file failed!");
+                }
 
             }
 
             fseek(file, start_index * bytes, 0);
         
-            fwrite(processed_buff, sizeof(char), bytes, file);
+            if(fwrite(processed_buff, sizeof(char), bytes, file) != bytes){
+                err_sys("Write to file failed!");
+            }
         }
 
         fclose(file);
@@ -163,13 +186,12 @@ void copy(const char *orig_file_name, const char* new_file_name, int records, in
     char buff[bytes];
 
     if(if_sys){
-	printf("Using system libraries!"); 
         int orig_fd = open(orig_file_path, O_RDONLY); 
-        int new_fd = open(new_file_path, O_WRONLY | O_CREAT | O_EXCL | O_APPEND, S_IRUSR | S_IWUSR); 
+        int new_fd = open(new_file_path, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR); 
 
 
         if(orig_fd == -1){
-            err_sys("Can't open original file!");
+            err_sys("Open original file failed!");
         }
 
         if(new_fd == -1){
@@ -178,11 +200,11 @@ void copy(const char *orig_file_name, const char* new_file_name, int records, in
 
         for(i = 0; i < records; i++){
             if(read(orig_fd, buff, bytes) != bytes){
-                err_sys("Read file failed!");
+                err_sys("Read from file failed!");
             }
 
             if(write(new_fd, buff, bytes) != bytes){
-                err_sys("Write file failed!");
+                err_sys("Write to file failed!");
             }
         }
 
@@ -192,17 +214,16 @@ void copy(const char *orig_file_name, const char* new_file_name, int records, in
         close(new_fd);
     }
     else{
-	printf("Using C libraries!");
         FILE *orig_file = fopen(orig_file_path, "r");
 
         if(orig_file == NULL){
-            err_sys("Original open file failed!");
+            err_sys("Open orignal file failed!");
         }
 
         FILE *new_file = fopen(new_file_path, "w");
 
         if(new_file == NULL){
-            err_sys("New open file failed!");
+            err_sys("Open new file failed!");
         }
 
         for(i = 0; i < records; i++){
@@ -219,91 +240,4 @@ void copy(const char *orig_file_name, const char* new_file_name, int records, in
         fclose(new_file);
 
     }
-}
-
-
-
-int main(int argc, const char **argv){
-    srand(time(NULL));
-
-    int records, bytes;
-    const char* sys = "sys";
-    const char *lib = "lib";
-
-    if(strcmp(argv[1], "generate") == 0){
-
-        if(argc != 5){
-            err_sys("Wrong number of arguments!");
-        }
-
-        if((records = atoi(argv[3])) <= 0){
-            err_sys("Wrong records size!");
-        }
-
-        if((bytes = atoi(argv[4])) <= 0){
-            err_sys("Wrong bytes size!");
-        }
-
-        generate(argv[2], records, bytes);
-    }
-    else if (strcmp(argv[1], "sort") == 0){
-
-        if(argc != 6){
-            err_sys("Wrong number of arguments!");
-        }
-
-        if((records = atoi(argv[3])) <= 0){
-            err_sys("Wrong records size!");
-        }
-
-        if((bytes = atoi(argv[4])) <= 0){
-            err_sys("Wrong bytes size!");
-        }
-
-        if(strcmp(argv[5], lib) == 0){
-            sort(argv[2], records, bytes, 0);
-        }
-        else if (strcmp(argv[5], sys) == 0){
-            sort(argv[2], records, bytes, 1);
-        }
-        else{
-            err_sys("Wrong implementation option!");
-        }
-
-    }
-    else if (strcmp(argv[1], "copy") == 0){
-
-        if(argc != 7){
-            err_sys("Wrong number of arguments!");
-        }
-
-        if( access( argv[2], F_OK ) == -1 ) {
-            err_sys("This file doesn't exist!");
-        }
-
-        if((records = atoi(argv[4])) <= 0){
-            err_sys("Wrong records size!");
-        }
-
-        if((bytes = atoi(argv[5])) <= 0){
-            err_sys("Wrong bytes size!");
-        }
-
-        if(strcmp(argv[6], lib) == 0){
-            copy(argv[2], argv[3], records, bytes, 0);
-        }
-        else if (strcmp(argv[6], sys) == 0){
-            copy(argv[2], argv[3], records, bytes, 1);
-        }
-        else{
-            err_sys("Wrong implementation option!");
-        }
-
-    }
-    else{
-        err_sys("Wrong action!");
-    }
-
-
-    return 0;
 }
