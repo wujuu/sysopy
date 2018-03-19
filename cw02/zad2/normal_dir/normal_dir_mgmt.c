@@ -75,18 +75,13 @@ void explore_dir(const char *dir_name, int comp_mode, time_t comp_date){
                 explore_dir(abs_path, comp_mode, comp_date);
             }
             else if (S_ISREG(file_stat.st_mode)){
-                if(comp_mode == -1 && comp_date < file_stat.st_mtime){
+                if( (comp_mode == -1 && comp_date < file_stat.st_mtime) ||
+                   (comp_mode == 0 && comp_date == file_stat.st_mtime) ||
+                   (comp_mode == 1 && comp_date > file_stat.st_mtime)){
+
                     printf("Absolute path: %s\n", abs_path);
                     display_file_stats(file_stat);
                 }
-                else if (comp_mode == 0 && comp_date == file_stat.st_mtime){
-                    printf("Absolute path: %s\n", abs_path);
-                    display_file_stats(file_stat);
-                }
-                else if(comp_mode == 1 && comp_date > file_stat.st_mtime){
-                    printf("Absolute path: %s\n", abs_path);
-                    display_file_stats(file_stat);
-                }    
             }
         }
 
@@ -112,7 +107,9 @@ int main(int argc, char **argv){
 
     if(argv[1][0] != '/'){
         char cwd[1024];
-        getcwd(cwd, sizeof(cwd));
+        if(getcwd(cwd, sizeof(cwd))){
+            err_sys("Coulnd't get cwd!");
+        };
         strcat(cwd, "/");
         strcat(cwd, dir_name);
         dir_name = cwd;
