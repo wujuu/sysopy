@@ -78,11 +78,17 @@ int main(int argc, char **argv){
         err_sys("Wrong number of agruments!");
     }
 
+    int last_index = 0;
+
+    while(argv[1][last_index] != '\0') last_index++;
+
+    if(argv[1][last_index - 1] == '/') argv[1][last_index - 1] = '\0';
+
     char* dir_name = argv[1];
 
     if(argv[1][0] != '/'){
         char cwd[1024];
-        if(getcwd(cwd, sizeof(cwd))){
+        if(getcwd(cwd, sizeof(cwd)) == NULL){
             err_sys("Coulnd't get cwd!");
         };
         strcat(cwd, "/");
@@ -130,7 +136,7 @@ int main(int argc, char **argv){
     comp_date = mktime(&tm_time);
     comp_mode = atoi(argv[2]);
 
-    nftw(argv[1], nftw_fun, 20, FTW_PHYS);
+    nftw(dir_name, nftw_fun, 20, FTW_PHYS);
 
     return 0;
 }

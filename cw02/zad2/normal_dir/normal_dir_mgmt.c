@@ -97,23 +97,33 @@ int main(int argc, char **argv){
 // ./a.out /home/patryk/Desktop/sysopy -1 2018 3 18 18 50 50
 
     struct tm tm_time;
-    time_t raw_time;
+    time_t raw_time; 
 
     if(argc != 9){
         err_sys("Wrong number of agruments!");
     }
 
+    int last_index = 0;
+
+    while(argv[1][last_index] != '\0') last_index++;
+
+    if(argv[1][last_index - 1] == '/') argv[1][last_index - 1] = '\0';
+
     char* dir_name = argv[1];
+
 
     if(argv[1][0] != '/'){
         char cwd[1024];
-        if(getcwd(cwd, sizeof(cwd))){
+        if(getcwd(cwd, sizeof(cwd)) == NULL){
             err_sys("Coulnd't get cwd!");
         };
         strcat(cwd, "/");
         strcat(cwd, dir_name);
         dir_name = cwd;
     }
+
+
+
 
 
     if(atoi(argv[2]) < -1 || atoi(argv[2]) > 1){
