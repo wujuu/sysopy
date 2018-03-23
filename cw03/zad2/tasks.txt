@@ -1,0 +1,4 @@
+ls /home/patryk -ali
+/bin/pwd
+echo "WTF"
+qwe
