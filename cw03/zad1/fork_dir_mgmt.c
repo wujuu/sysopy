@@ -72,6 +72,7 @@ void explore_dir(const char *dir_name, int comp_mode, time_t comp_date){
 
             lstat(abs_path, &file_stat);
 
+            //HERE ARE THE CHANGES
             if(S_ISDIR(file_stat.st_mode)){
                 
                 pid_t pid;
@@ -80,11 +81,11 @@ void explore_dir(const char *dir_name, int comp_mode, time_t comp_date){
                     err_sys("Fork failed!");
                 }
 
-                else if(pid == 0){
+                else if(pid == 0){ //CHILD PROCESS EXECUTES FUNCTION FURTHER
                     explore_dir(abs_path, comp_mode, comp_date);
                     exit(0);
                 }else{
-                    wait(NULL);
+                    wait(NULL); //PARENT WAITS
                 }
                 
             }

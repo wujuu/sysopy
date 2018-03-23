@@ -8,8 +8,8 @@
 int MAX_ARG_SIZE = 20;
 
 
+//DISPLAYING SINGLE COMMAND BY INDEX
 void display_command(char ***commands, int index){
-
     int j = 0;
     
     for(j = 0; j < MAX_ARG_SIZE && commands[index][j] != NULL; j++)
@@ -82,7 +82,7 @@ char ***parse_commands(char *commands_file_path, int *commands_amount){
     }
 
     
-    
+
     //SPLITTING RAW FILE DATA INTO COMMAND ARRAY
     i = 0;
     while((full_command = strsep(&r_buff, "\n")) ){
