@@ -51,7 +51,10 @@ char ***parse_commands(char *commands_file_path, int *commands_amount){
         exit(1);
     }
 
-    fread(r_buff, sizeof(char), commands_size, commands_ptr);
+    if(fread(r_buff, sizeof(char), commands_size, commands_ptr) != commands_size){
+        perror("Failed to read from file!");
+        exit(1);
+    }
 
     fclose(commands_ptr);
 
@@ -79,12 +82,12 @@ char ***parse_commands(char *commands_file_path, int *commands_amount){
     }
 
     
-
+    
     //SPLITTING RAW FILE DATA INTO COMMAND ARRAY
     i = 0;
     while((full_command = strsep(&r_buff, "\n")) ){
         j = 0;
-        while(sub_command = strsep(&full_command, " ")){
+        while((sub_command = strsep(&full_command, " "))){
             commands[i][j] = sub_command;
             j++;
         }
