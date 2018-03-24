@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <sys/resource.h>
 #include <string.h>
 
 int MAX_ARG_SIZE = 20;
@@ -94,19 +95,10 @@ char ***parse_commands(char *commands_file_path, int *commands_amount){
         i++;
     }
 
-
-
     return commands;
 }
 
-
-int main(int argc, char **argv){
-
-
-    int commands_amount;
-
-    //PARSING COMMANDS INTO NICE COMMAND ARRAY
-    char ***commands = parse_commands(argv[1], &commands_amount);
+int interpret(char ***commands, int commands_amount, long int cpu_limit, long int vmem_limit){
 
 
     //MAIN INTERPRETER LOOP
@@ -114,7 +106,7 @@ int main(int argc, char **argv){
         pid_t pid;
 
         //FORKING
-        if((pid = vfork()) < 0){
+        if((pid = fork()) < 0){
             perror("Fork failed!");
         }
         else if(pid == 0){  //IF CHILD, EXECUTE COMMAND
@@ -122,10 +114,30 @@ int main(int argc, char **argv){
             printf("Command: ");
             display_command(commands, i);
 
-            if (execvp(commands[i][0], commands[i])){
-                perror("Failed to execute command!");
+            struct rlimit cpu_rlimit, vmem_rlimit;
+
+            cpu_rlimit.rlim_max = cpu_limit;
+            cpu_rlimit.rlim_cur = cpu_limit;
+
+            vmem_rlimit.rlim_max = vmem_limit * 1000000;
+            vmem_rlimit.rlim_cur = vmem_limit * 1000000;
+
+
+            if(setrlimit(RLIMIT_CPU, &cpu_rlimit) != 0){
+                perror("Couldn't set resource limit info");
                 exit(1);
             }
+            
+            if(setrlimit(RLIMIT_AS, &vmem_rlimit) != 0){
+                perror("Couldn't set resource limit info");
+                exit(1);
+            }
+
+            if (execvp(commands[i][0], commands[i]) != 0){
+                exit(1);
+            }
+
+            exit(0); //NOT REALY NECESSARY
         }
         else if(pid > 0){   //IF PARENT, WAIT FOR CHILD TO EXECUTE COMMAND
             int statloc;
@@ -133,11 +145,87 @@ int main(int argc, char **argv){
             wait(&statloc);
 
             if(statloc != 0){
-                exit(0);
+                printf("Failed to execute command!\n");
+                exit(1);
             }
 
             printf("\n");     
         }
     }
+
+    return 0;
+}
+
+
+int main(int argc, char **argv){
+
+    int commands_amount;
+
+    //PARSING COMMANDS INTO NICE COMMAND ARRAY
+    char ***commands = parse_commands(argv[1], &commands_amount);
+
+    int cpu_limit = atoi(argv[2]), vmem_limit = atoi(argv[3]);
+
+    interpret(commands, commands_amount, cpu_limit, vmem_limit);
+
+
+
+
+
+    // struct rlimit set_lim, get_lim;
+
+    // if(getrlimit(RLIMIT_CPU, &get_lim) != 0){
+    //     perror("Couldn't get resource limit info");
+    //     exit(1);
+    // }
+
+    // if(get_lim.rlim_cur == RLIM_INFINITY){
+    //     printf("ININITE CURR LIMIT\n");
+    // }else{
+    //     printf("CURR LIMIT = %li\n", get_lim.rlim_cur);
+    // }
+    
+    // if(get_lim.rlim_max == RLIM_INFINITY){
+    //     printf("INFINITE MAX LIMIT\n");
+    // }else{
+    //     printf("MAX LIMIT = %li\n", get_lim.rlim_max);
+    // }
+
+
+
+    // set_lim.rlim_cur = 1024;
+    // set_lim.rlim_max = 2048;
+
+    // if(setrlimit(RLIMIT_CPU, &set_lim) != 0){
+    //     perror("Couldn't set resource limit info");
+    //     exit(1);
+    // }
+
+
+
+    // if(getrlimit(RLIMIT_CPU, &get_lim) != 0){
+    //     perror("Couldn't get resource limit info");
+    //     exit(1);
+    // }
+
+    // if(get_lim.rlim_cur == RLIM_INFINITY){
+    //     printf("ININITE CURR LIMIT\n");
+    // }else{
+    //     printf("CURR LIMIT = %li\n", get_lim.rlim_cur);
+    // }
+    
+    // if(get_lim.rlim_max == RLIM_INFINITY){
+    //     printf("INFINITE MAX LIMIT\n");
+    // }else{
+    //     printf("MAX LIMIT = %li\n", get_lim.rlim_max);
+    //}
+
+
+
+
+
+
+
+    
     exit(0);
 }

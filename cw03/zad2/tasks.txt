@@ -1,4 +1,4 @@
-ls /home/patryk -alie
-/bin/pwd
+ls /home/patryk -ali
+/bin/pwde
 echo "WTF"
 qwe
