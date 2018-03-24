@@ -1,0 +1,4 @@
+ls -R .
+du -sh
+/bin/echo "Hello world!"
+invalid command

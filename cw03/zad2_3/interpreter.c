@@ -100,10 +100,14 @@ char ***parse_commands(char *commands_file_path, int *commands_amount){
 
 int interpret(char ***commands, int commands_amount, long int cpu_limit, long int vmem_limit){
 
+    //INITIALIZING TIME 
+    struct rusage child_rusage;
+    getrusage(RUSAGE_CHILDREN, &child_rusage);
 
     //MAIN INTERPRETER LOOP
     for(int i = 0; i < commands_amount; i++){
         pid_t pid;
+
 
         //FORKING
         if((pid = fork()) < 0){
@@ -114,13 +118,15 @@ int interpret(char ***commands, int commands_amount, long int cpu_limit, long in
             printf("Command: ");
             display_command(commands, i);
 
+
+            //SETTING LIMITS
             struct rlimit cpu_rlimit, vmem_rlimit;
 
             cpu_rlimit.rlim_max = cpu_limit;
-            cpu_rlimit.rlim_cur = cpu_limit;
+            cpu_rlimit.rlim_cur = cpu_limit / 2;
 
             vmem_rlimit.rlim_max = vmem_limit * 1000000;
-            vmem_rlimit.rlim_cur = vmem_limit * 1000000;
+            vmem_rlimit.rlim_cur = vmem_limit * 500000;
 
 
             if(setrlimit(RLIMIT_CPU, &cpu_rlimit) != 0){
@@ -133,11 +139,10 @@ int interpret(char ***commands, int commands_amount, long int cpu_limit, long in
                 exit(1);
             }
 
+            //EXECUTING COMMAND
             if (execvp(commands[i][0], commands[i]) != 0){
                 exit(1);
             }
-
-            exit(0); //NOT REALY NECESSARY
         }
         else if(pid > 0){   //IF PARENT, WAIT FOR CHILD TO EXECUTE COMMAND
             int statloc;
@@ -149,7 +154,24 @@ int interpret(char ***commands, int commands_amount, long int cpu_limit, long in
                 exit(1);
             }
 
-            printf("\n");     
+            printf("\n");   
+
+
+            //TIME MEASURING
+            struct rusage prev_child_rusage = child_rusage;
+  
+            getrusage(RUSAGE_CHILDREN, &child_rusage);
+
+            double curr_u_sec = (double) (child_rusage.ru_utime.tv_sec - prev_child_rusage.ru_utime.tv_sec);
+            double curr_u_usec = ((double) (child_rusage.ru_utime.tv_usec - prev_child_rusage.ru_utime.tv_usec)) / 1000000;
+
+            double curr_s_sec = (double) (child_rusage.ru_stime.tv_sec - prev_child_rusage.ru_stime.tv_sec);
+            double curr_s_usec = ((double) (child_rusage.ru_stime.tv_usec - prev_child_rusage.ru_stime.tv_usec)) / 1000000;
+
+
+            printf("Command execution time: \n");
+            printf("USER TIME: %f\n", curr_u_sec + curr_u_usec);
+            printf("SYSTEM TIME: %f\n\n", curr_s_sec + curr_s_usec);
         }
     }
 
@@ -159,73 +181,15 @@ int interpret(char ***commands, int commands_amount, long int cpu_limit, long in
 
 int main(int argc, char **argv){
 
-    int commands_amount;
+    int commands_amount;  
 
     //PARSING COMMANDS INTO NICE COMMAND ARRAY
     char ***commands = parse_commands(argv[1], &commands_amount);
 
+    //PARSING RESOURCE LIMITS
     int cpu_limit = atoi(argv[2]), vmem_limit = atoi(argv[3]);
 
     interpret(commands, commands_amount, cpu_limit, vmem_limit);
 
-
-
-
-
-    // struct rlimit set_lim, get_lim;
-
-    // if(getrlimit(RLIMIT_CPU, &get_lim) != 0){
-    //     perror("Couldn't get resource limit info");
-    //     exit(1);
-    // }
-
-    // if(get_lim.rlim_cur == RLIM_INFINITY){
-    //     printf("ININITE CURR LIMIT\n");
-    // }else{
-    //     printf("CURR LIMIT = %li\n", get_lim.rlim_cur);
-    // }
-    
-    // if(get_lim.rlim_max == RLIM_INFINITY){
-    //     printf("INFINITE MAX LIMIT\n");
-    // }else{
-    //     printf("MAX LIMIT = %li\n", get_lim.rlim_max);
-    // }
-
-
-
-    // set_lim.rlim_cur = 1024;
-    // set_lim.rlim_max = 2048;
-
-    // if(setrlimit(RLIMIT_CPU, &set_lim) != 0){
-    //     perror("Couldn't set resource limit info");
-    //     exit(1);
-    // }
-
-
-
-    // if(getrlimit(RLIMIT_CPU, &get_lim) != 0){
-    //     perror("Couldn't get resource limit info");
-    //     exit(1);
-    // }
-
-    // if(get_lim.rlim_cur == RLIM_INFINITY){
-    //     printf("ININITE CURR LIMIT\n");
-    // }else{
-    //     printf("CURR LIMIT = %li\n", get_lim.rlim_cur);
-    // }
-    
-    // if(get_lim.rlim_max == RLIM_INFINITY){
-    //     printf("INFINITE MAX LIMIT\n");
-    // }else{
-    //     printf("MAX LIMIT = %li\n", get_lim.rlim_max);
-    //}
-
-
-
-
-
-
-
-    
     exit(0);
 }
