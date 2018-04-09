@@ -61,8 +61,6 @@ int main(){
 
             global_child_pid = child_pid;
             
-
-            
             signal(SIGTSTP, &TSTP_parent_handler);
             wait(NULL);
             signal(SIGINT, INT_handler);
