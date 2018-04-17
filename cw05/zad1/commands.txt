@@ -1,0 +1,3 @@
+ls -l | grep a.out | sort
+ls -l | grep a.out | sort
+ls -l | grep rw | sort | sort | sort | sort
