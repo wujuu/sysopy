@@ -95,7 +95,7 @@ struct msg mirror_hanler(struct msg recieved_msg){
 }
 
 
-void start_handler(struct msg recieved_msg, struct client *clients_array){
+struct msg start_handler(struct msg recieved_msg){
     int pid = extract_pid(recieved_msg);
     char str_client_queue_id[MSG_SIZE];
     fill_nulls(str_client_queue_id);
@@ -113,44 +113,35 @@ void start_handler(struct msg recieved_msg, struct client *clients_array){
         j++;
     }
 
-    int client_queue_id = atoi(str_client_queue_id);
 
-    insert_client(clients_array, pid, client_queue_id);
+    struct msg return_msg = init_msg(pid, str_client_queue_id);
 
-    
-
-
+    return return_msg;
 }
 
-struct msg query_handler(struct msg recieved_msg){
-    int sender_pid = extract_pid(recieved_msg);
+
+void query_handler(struct msg recieved_msg, struct client *clients_array){
+    struct msg return_msg;
     
     if(recieved_msg.type == START){
+        return_msg = start_handler(recieved_msg);
 
+        insert_client(clients_array, return_msg.type, atoi(return_msg.txt));
+
+        printf("Got a start message from %i\n", return_msg.type);
     }
     if(recieved_msg.type == MIRROR){
-        return mirror_hanler(recieved_msg);
+        
+        return_msg = mirror_hanler(recieved_msg);
+
+        printf("Got a mirror message from %i\n", return_msg.type);
     }
+
+    int client_index = get_client_index(clients_array, return_msg.type);
+
+    msgsnd(clients_array[client_index].client_queue_id, &return_msg, MSG_SIZE, 0);
 }
 
-
-
-struct msg make_start_msg(int private_queue_id){
-    int client_pid = getpid();
-    char str_client_pid[MSG_SIZE];
-    snprintf(str_client_pid, MSG_SIZE, "%d", client_pid);
-
-    struct msg new_start_msg = init_msg(START, str_client_pid);
-
-    char str_private_queue_id[MSG_SIZE];
-    snprintf(str_private_queue_id, MSG_SIZE, "%d", private_queue_id);
-
-    strcat(new_start_msg.txt, " ");
-
-    strcat(new_start_msg.txt, str_private_queue_id);
-
-    return new_start_msg;
-}
 
 
 
@@ -160,32 +151,31 @@ int main(){
 
     init_clients_array(clients_array);
 
-    struct msg start_msg = make_start_msg(12);
+    key_t public_queue_key;
+    int public_queue_id;
 
-    start_handler(start_msg, clients_array);
+    struct msg recieved_msg = init_msg(-1, "");
 
-    print_clients_array(clients_array);
-
-
-    // key_t public_queue_key;
-    // int public_queue_id;
-
-    // public_queue_key = ftok(public_key_path, public_key_id);
-
-    // //Creating public message queue
-    // if((public_queue_id = msgget(public_queue_key, IPC_CREAT | IPC_EXCL | 0666)) < 0){
-    //     perror("Failed to create new public queue!");
-    //     exit(1);
-    // }
+    public_queue_key = ftok(public_key_path, public_key_id);
 
 
+    // Creating public message queue
+    if((public_queue_id = msgget(public_queue_key, IPC_CREAT | 0666)) < 0){ //IPC_CREAT | IPC_EXCL | 0666
+        perror("Failed to create new public queue!");
+        exit(1);
+    }
 
+    while(1){
+        msgrcv(public_queue_id, &recieved_msg, MSG_SIZE, 0, 0);
+
+        query_handler(recieved_msg, clients_array);
+    }
 
     // //Removing public message queue
-    // if((msgctl(public_queue_id, IPC_RMID, NULL)) < 0){
-    //     perror("Failed to remove the public queue!");
-    //     exit(1);
-    // }
+    if((msgctl(public_queue_id, IPC_RMID, NULL)) < 0){
+        perror("Failed to remove the public queue!");
+        exit(1);
+    }
 
     exit(0);
 }

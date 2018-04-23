@@ -9,7 +9,7 @@
 #define public_key_id 0
 #define public_key_path "/home/patryk/XSI_keys/keys.txt"
 
-#define START 0
+#define START 5
 #define MIRROR 1
 #define CALC 2
 #define TIME 3
