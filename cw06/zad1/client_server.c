@@ -5,19 +5,23 @@
 #include <sys/msg.h>
 #include "client_server.h"
 
+void fill_nulls(char *string){
+    for(int i = 0; i < MSG_SIZE; i++){
+        string[i] = '\0';
+    }
+}
 
-struct txt_msg init_txt_msg(long new_type, char* new_txt){
-    struct txt_msg new_txt_msg;
+struct msg init_msg(long new_type, char* new_txt){
+    struct msg new_msg;
 
-    new_txt_msg.type = new_type;
+    new_msg.type = new_type;
 
-    for(int i = 0; i < TXT_MSG_SIZE; i++)
-        new_txt_msg.txt[i] = '\0';
+    fill_nulls(new_msg.txt);
 
-    for(int i = 0; i < TXT_MSG_SIZE && new_txt[i] != '\0'; i++)
-        new_txt_msg.txt[i] = new_txt[i];
+    for(int i = 0; i < MSG_SIZE && new_txt[i] != '\0'; i++)
+        new_msg.txt[i] = new_txt[i];
 
-    return new_txt_msg;
+    return new_msg;
 }
 
 
