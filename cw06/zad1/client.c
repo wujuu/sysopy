@@ -5,7 +5,12 @@
 #include <sys/msg.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
+#include <fcntl.h>
 #include "client_server.h"
+
+int public_queue_id;
+int private_queue_id;
 
 struct msg make_start_msg(int private_queue_id){
 
@@ -74,6 +79,20 @@ struct msg make_end_msg(){
     return new_stop_msg;
 }
 
+struct msg make_calc_msg(char *new_txt){
+    int client_pid = getpid();
+    char str_client_pid[MSG_SIZE];
+    snprintf(str_client_pid, MSG_SIZE, "%d", client_pid);
+
+    strcat(str_client_pid, " ");
+    strcat(str_client_pid, new_txt);
+
+    struct msg new_calc_msg = init_msg(CALC, str_client_pid);
+
+    return new_calc_msg;
+}
+
+
 
 void extract_info(char *user_input, char *task_buffer, char *msg_buffer){
 
@@ -96,9 +115,10 @@ void extract_info(char *user_input, char *task_buffer, char *msg_buffer){
         msg_buffer[j] = user_input[i];
         j++;
     }
-
-    // if(msg_buffer[0] == ' ')
 }
+
+
+
 
 
 void remove_private_queue(int private_queue_id){
@@ -108,36 +128,32 @@ void remove_private_queue(int private_queue_id){
     }
 }
 
+void sigint_handler(int sig){
+    struct msg stop_msg = make_stop_msg();
+
+    struct msg recieved_msg = init_msg(0, "");
+
+    if(msgsnd(public_queue_id, &stop_msg, MSG_SIZE, 0) < 0){
+        printf("Server is dead!\n");
+        remove_private_queue(private_queue_id);
+        exit(1);
+    }
+
+    if(msgrcv(private_queue_id, &recieved_msg, MSG_SIZE, 0, 0) < 0){
+        perror("Failed to recieve a message queue!");
+        exit(1);
+    }
+
+    remove_private_queue(private_queue_id);
+    printf("Got SIGINT sending STOP to server, removing private queue and exiting...\n");
+    exit(1);
+}
 
 
 int main(){
-
-    // char user_input[MSG_SIZE];
-    // char task_buffer[MSG_SIZE];
-    // char msg_buffer[MSG_SIZE];
-    // fill_nulls(user_input);
-    // fill_nulls(task_buffer);
-    // fill_nulls(msg_buffer);
-
-    // char* asd = "MIRROR asd";
-
-    // for(int i = 0; i < 16; i++){
-    //     user_input[i] = asd[i];
-    // }
-
-    // extract_info(user_input, task_buffer, msg_buffer);
-
-    // printf("%sw\n", user_input);
-    // printf("%sw\n", task_buffer);
-    // printf("%sw\n", msg_buffer);
-
-
-
-    
+    signal(SIGINT, sigint_handler);
 
     key_t public_queue_key;
-    int public_queue_id;
-    int private_queue_id;
 
     //Getting public queue key
     public_queue_key = ftok(public_key_path, public_key_id);
@@ -149,7 +165,7 @@ int main(){
     }
 
     //Creating private message queue
-    if((private_queue_id = msgget(IPC_PRIVATE, IPC_CREAT | IPC_EXCL | 0666)) < 0){
+    if((private_queue_id = msgget(IPC_PRIVATE, IPC_CREAT | IPC_EXCL | S_IWUSR | S_IRUSR)) < 0){
         perror("Failed to create a private queue!");
         exit(1);
     }
@@ -175,7 +191,7 @@ int main(){
 
     if(strcmp(recieved_msg.txt, "Hello") != 0){
         remove_private_queue(private_queue_id);
-        return 1;
+        exit(1);
     }
 
 
@@ -216,6 +232,9 @@ int main(){
 
         else if(strcmp(task_buffer, "END") == 0){
             new_msg = make_end_msg(msg_buffer);
+        }
+        else if(strcmp(task_buffer, "CALC") == 0){
+            new_msg = make_calc_msg(msg_buffer);
         }
 
         else{

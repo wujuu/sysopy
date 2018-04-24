@@ -6,9 +6,12 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+#include <fcntl.h>
+#include <signal.h>
 #include "client_server.h"
 
 int emergency = 0;
+int public_queue_id;
 
 struct client{
     int pid;
@@ -119,7 +122,6 @@ struct msg get_mirror_return_msg(int sender_pid, char *message_txt){
     return return_msg;
 }
 
-
 struct msg get_start_return_msg(int sender_pid, char *message_txt, int failed){
 
     struct msg return_msg;
@@ -147,7 +149,6 @@ struct msg get_time_return_msg(int sender_pid, char *message_txt){
     return return_msg;
 }
 
-
 struct msg get_stop_return_msg(int sender_pid, char *message_txt){
 
     struct msg return_msg = init_msg(sender_pid, "Goodbye");
@@ -155,23 +156,34 @@ struct msg get_stop_return_msg(int sender_pid, char *message_txt){
     return return_msg;
 }
 
-// void end_them_all(struct client *clients_array, int sender_pid){
-//     int sender_index = get_client_index(clients_array, sender_pid);
-//     struct msg stp_msg;
+struct msg get_calc_return_msg(int sender_pid, char *message_txt){
 
-//     for(int i = 0; i < MAX_CLIENTS; i++){
-//         if(clients_array[i].pid != -1 && i != sender_index){
-//             stp_msg = get_stop_return_msg(clients_array[i].pid, "");
-//             msgsnd(clients_array[i].client_queue_id, &stp_msg, MSG_SIZE, 0);
-//         }
-//     }
+    int x = message_txt[1] - '0';
+    int y = message_txt[3] - '0';
+    int result = 0;
 
-//     emergency = 1;
-// }
+    char op = message_txt[2];
 
+    if(op == '+'){
+        result = x + y;
+    }
+    else if(op == '-'){
+        result = x - y;
+    }
+    else if(op == '/'){
+        result = x / y;
+    }
+    else if(op == '*'){
+        result = x * y;
+    }
 
+    char str_result[1]; 
+    str_result[0] = result + '0';
 
+    struct msg return_msg = init_msg(sender_pid, str_result);
 
+    return return_msg;
+}
 
 
 void query_handler(struct msg recieved_msg, struct client *clients_array){
@@ -221,7 +233,10 @@ void query_handler(struct msg recieved_msg, struct client *clients_array){
         return_msg = get_stop_return_msg(sender_pid, msg_txt);
         printf("Got an END message from %i\n", sender_pid);
         emergency = 1;
-        // end_them_all(clients_array, sender_pid);
+    }
+    else if(recieved_msg.type == CALC){
+        return_msg = get_calc_return_msg(sender_pid, msg_txt);
+        printf("Got an CALC message from %i\n", sender_pid);
     }
 
     //Get client queue id
@@ -235,16 +250,30 @@ void query_handler(struct msg recieved_msg, struct client *clients_array){
     if(recieved_msg.type == STOP) delete_client(clients_array, sender_pid);
 }
 
+void remove_public_queue(int public_queue_id){
+    if((msgctl(public_queue_id, IPC_RMID, NULL)) < 0){
+        perror("Failed to remove the public queue!");
+        exit(1);
+    }
+}
+
+void sigint_handler(int sig){
+    remove_public_queue(public_queue_id);
+    printf("Got SIGINT, removing public queue and exiting...\n");
+    exit(1);
+}
+
 
 
 
 int main(){
+    signal(SIGINT, sigint_handler);
     struct client clients_array[MAX_CLIENTS];
 
     init_clients_array(clients_array);
 
     key_t public_queue_key;
-    int public_queue_id;
+
 
     struct msg recieved_msg = init_msg(-1, "");
 
@@ -252,7 +281,7 @@ int main(){
 
 
     // Creating public message queue
-    if((public_queue_id = msgget(public_queue_key, IPC_CREAT | 0666)) < 0){
+    if((public_queue_id = msgget(public_queue_key, IPC_CREAT | S_IWUSR | S_IRUSR)) < 0){
         perror("Failed to create new public queue!");
         exit(1);
     }
@@ -266,10 +295,7 @@ int main(){
     }
 
     // //Removing public message queue
-    if((msgctl(public_queue_id, IPC_RMID, NULL)) < 0){
-        perror("Failed to remove the public queue!");
-        exit(1);
-    }
+    remove_public_queue(public_queue_id);
 
     exit(0);
 }
