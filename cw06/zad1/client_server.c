@@ -37,3 +37,13 @@ void print_queue_stats(int queue_id){
     printf("pid of last sender = %i, pid of last reciever = %i\n", queue_stat.msg_lspid, queue_stat.msg_lrpid);
     printf("time of last send = %li, time of last recieve = %li\n", queue_stat.msg_stime, queue_stat.msg_rtime);
 }
+
+void remove_trailing_newline(char* string){
+    int last_index = 0;
+
+    for(int i = 0; i < MSG_SIZE && string[i] != '\0'; i++){
+        last_index = i;
+    }
+
+    string[last_index] = '\0';
+}

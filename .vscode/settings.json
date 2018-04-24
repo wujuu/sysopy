@@ -3,6 +3,7 @@
         "stdio.h": "c",
         "msg.h": "c",
         "stdlib.h": "c",
-        "types.h": "c"
+        "types.h": "c",
+        "client_server.h": "c"
     }
 }

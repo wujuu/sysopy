@@ -5,7 +5,10 @@
 #include <sys/msg.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 #include "client_server.h"
+
+int emergency = 0;
 
 struct client{
     int pid;
@@ -45,6 +48,12 @@ void insert_client(struct client *clients_array, int pid, int client_queue_id){
     clients_array[free_index].client_queue_id = client_queue_id; 
 }
 
+void delete_client(struct client *clients_array, int pid){
+    int deleted_client_index = get_client_index(clients_array, pid);
+    clients_array[deleted_client_index].pid = -1;
+    clients_array[deleted_client_index].client_queue_id = -1;
+}
+
 void print_clients_array(struct client *clients_array){
     for(int i = 0; i < MAX_CLIENTS; i++){
         printf("index: %i, pid: %i, queue_id: %i\n", i, clients_array[i].pid, clients_array[i].client_queue_id);
@@ -66,87 +75,170 @@ int extract_pid(struct msg recieved_msg){
     return atoi(pid_buffer);
 }
 
+void extract_txt(struct msg recieved_msg, char *txt_buffer){
 
-struct msg mirror_hanler(struct msg recieved_msg){
-    int sender_pid = extract_pid(recieved_msg);
+    int txt_index = 0;
 
-    struct msg return_msg = init_msg(sender_pid, "");
+    for(int i = 0; i < MSG_SIZE && recieved_msg.txt[i] != ' ' && recieved_msg.txt[i] != '\0'; i++){
+        txt_index = i;
+    }
 
-    int first_index = 0;
+    txt_index += 2;
 
-    for(int i = 0; i < MSG_SIZE && recieved_msg.txt[i] != ' '; i++)
-        first_index = i;
+    int j = 0;
+    for(int i = txt_index; i < MSG_SIZE && recieved_msg.txt[i] != '\0'; i++){
+        txt_buffer[j] = recieved_msg.txt[i];
+        j++;
+    }
+}
 
-    first_index++;
 
+
+
+
+
+//Return messages handlers
+struct msg get_mirror_return_msg(int sender_pid, char *message_txt){
     int last_index = 0;
 
-    for(int i = 0; recieved_msg.txt[i] != '\0'; i++){
+    for(int i = 0; message_txt[i] != '\0'; i++){
         last_index = i;
     }
 
+    char reverse_buffer[MSG_SIZE];
+    fill_nulls(reverse_buffer);
+
     int j = 0;
-    for(int i = last_index; i > first_index; i--){
-        return_msg.txt[j] = recieved_msg.txt[i];
+    for(int i = last_index; i >= 0; i--){
+        reverse_buffer[j] = message_txt[i];
         j++;
     }
+
+    struct msg return_msg = init_msg(sender_pid, reverse_buffer);
 
     return return_msg;
 }
 
 
-struct msg start_handler(struct msg recieved_msg){
-    int pid = extract_pid(recieved_msg);
-    char str_client_queue_id[MSG_SIZE];
-    fill_nulls(str_client_queue_id);
+struct msg get_start_return_msg(int sender_pid, char *message_txt, int failed){
 
-    int queue_index = 0;
+    struct msg return_msg;
 
-    for(int i = 0; i < MSG_SIZE && recieved_msg.txt[i] != ' '; i++){
-        queue_index = i;
+    if(failed){
+        return_msg = init_msg(sender_pid, "No entry");
+    } else {
+        return_msg = init_msg(sender_pid, "Hello");
     }
-    queue_index++;
+    return return_msg;
+}
 
-    int j = 0;
-    for(int i = queue_index; i < MSG_SIZE && recieved_msg.txt[i] != '\0'; i++){
-        str_client_queue_id[j] = recieved_msg.txt[i];
-        j++;
-    }
+struct msg get_time_return_msg(int sender_pid, char *message_txt){
+    time_t rawtime;
+    struct tm * timeinfo;
 
+    time(&rawtime);
+    timeinfo = localtime (&rawtime);
+    char *h_read_time = asctime (timeinfo);
 
-    struct msg return_msg = init_msg(pid, str_client_queue_id);
+    remove_trailing_newline(h_read_time);
+
+    struct msg return_msg = init_msg(sender_pid, h_read_time);
 
     return return_msg;
 }
+
+
+struct msg get_stop_return_msg(int sender_pid, char *message_txt){
+
+    struct msg return_msg = init_msg(sender_pid, "Goodbye");
+
+    return return_msg;
+}
+
+// void end_them_all(struct client *clients_array, int sender_pid){
+//     int sender_index = get_client_index(clients_array, sender_pid);
+//     struct msg stp_msg;
+
+//     for(int i = 0; i < MAX_CLIENTS; i++){
+//         if(clients_array[i].pid != -1 && i != sender_index){
+//             stp_msg = get_stop_return_msg(clients_array[i].pid, "");
+//             msgsnd(clients_array[i].client_queue_id, &stp_msg, MSG_SIZE, 0);
+//         }
+//     }
+
+//     emergency = 1;
+// }
+
+
+
+
 
 
 void query_handler(struct msg recieved_msg, struct client *clients_array){
+    //For storing return messages to the client
     struct msg return_msg;
-    
-    if(recieved_msg.type == START){
-        return_msg = start_handler(recieved_msg);
 
-        insert_client(clients_array, return_msg.type, atoi(return_msg.txt));
+    //Extracting sender's pid
+    int sender_pid = extract_pid(recieved_msg);
 
-        printf("Got a start message from %i\n", return_msg.type);
+    //Extracting recieved msg txt value
+    char msg_txt[MSG_SIZE];
+    fill_nulls(msg_txt);
+    extract_txt(recieved_msg, msg_txt);
+
+    if(recieved_msg.type == START){ 
+
+        int client_queue_id = atoi(msg_txt);   
+
+        if(get_free_index(clients_array) == -1){
+            return_msg = get_start_return_msg(sender_pid, msg_txt, 1);
+            msgsnd(client_queue_id, &return_msg, MSG_SIZE, 0);
+            printf("Got a START message from %i, but MAX_CLIENTS exceeded\n", sender_pid);
+            
+        } else {
+            insert_client(clients_array, sender_pid, client_queue_id);
+            return_msg = get_start_return_msg(sender_pid, msg_txt, 0);
+            printf("Got a START message from %i and starting the client\n", sender_pid);
+        }
     }
-    if(recieved_msg.type == MIRROR){
-        
-        return_msg = mirror_hanler(recieved_msg);
 
-        printf("Got a mirror message from %i\n", return_msg.type);
+    else if(recieved_msg.type == MIRROR){
+        return_msg = get_mirror_return_msg(sender_pid, msg_txt);
+        printf("Got a MIRROR message from %i\n", sender_pid);
     }
 
-    int client_index = get_client_index(clients_array, return_msg.type);
+    else if(recieved_msg.type == TIME){  
+        return_msg = get_time_return_msg(sender_pid, msg_txt);
+        printf("Got a TIME message from %i\n", sender_pid);
+    }
 
-    msgsnd(clients_array[client_index].client_queue_id, &return_msg, MSG_SIZE, 0);
+    else if(recieved_msg.type == STOP){
+        return_msg = get_stop_return_msg(sender_pid, msg_txt);
+        printf("Got a STOP message from %i\n", sender_pid);
+    }
+
+    else if(recieved_msg.type == END){
+        return_msg = get_stop_return_msg(sender_pid, msg_txt);
+        printf("Got an END message from %i\n", sender_pid);
+        emergency = 1;
+        // end_them_all(clients_array, sender_pid);
+    }
+
+    //Get client queue id
+    int client_index = get_client_index(clients_array, sender_pid);
+    int client_queue_id = clients_array[client_index].client_queue_id;
+
+    //Send back return message
+    msgsnd(client_queue_id, &return_msg, MSG_SIZE, 0);
+
+    //Have to delete here, otherwise it wouldn't be able to communicate back
+    if(recieved_msg.type == STOP) delete_client(clients_array, sender_pid);
 }
 
 
 
 
 int main(){
-
     struct client clients_array[MAX_CLIENTS];
 
     init_clients_array(clients_array);
@@ -160,15 +252,17 @@ int main(){
 
 
     // Creating public message queue
-    if((public_queue_id = msgget(public_queue_key, IPC_CREAT | 0666)) < 0){ //IPC_CREAT | IPC_EXCL | 0666
+    if((public_queue_id = msgget(public_queue_key, IPC_CREAT | 0666)) < 0){
         perror("Failed to create new public queue!");
         exit(1);
     }
 
-    while(1){
+    while(!emergency){
         msgrcv(public_queue_id, &recieved_msg, MSG_SIZE, 0, 0);
 
         query_handler(recieved_msg, clients_array);
+
+        print_clients_array(clients_array);
     }
 
     // //Removing public message queue

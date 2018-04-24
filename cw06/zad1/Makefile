@@ -7,13 +7,13 @@ all:
 server: server.o client_server.o
 	gcc $(CFLAGS) server.o client_server.o -o server
 
-server.o: server.c 
+server.o: server.c client_server.h
 	gcc $(CFLAGS) -c server.c -o server.o 
 
-client: client.o client_server.o
+client: client.o client_server.o 
 	gcc $(CFLAGS) client.o client_server.o -o client
 
-client.o: client.c 
+client.o: client.c client_server.h
 	gcc $(CFLAGS) -c client.c -o client.o
 
 client_server.o: client_server.c client_server.h
