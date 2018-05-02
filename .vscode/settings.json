@@ -4,6 +4,8 @@
         "msg.h": "c",
         "stdlib.h": "c",
         "types.h": "c",
-        "client_server.h": "c"
+        "client_server.h": "c",
+        "shm.h": "c",
+        "single_sem.h": "c"
     }
 }

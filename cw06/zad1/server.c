@@ -281,7 +281,7 @@ int main(){
 
 
     // Creating public message queue
-    if((public_queue_id = msgget(public_queue_key, IPC_CREAT | S_IWUSR | S_IRUSR)) < 0){
+    if((public_queue_id = msgget(public_queue_key, IPC_CREAT | IPC_EXCL | S_IWUSR | S_IRUSR)) < 0){
         perror("Failed to create new public queue!");
         exit(1);
     }
@@ -290,8 +290,6 @@ int main(){
         msgrcv(public_queue_id, &recieved_msg, MSG_SIZE, 0, 0);
 
         query_handler(recieved_msg, clients_array);
-
-        print_clients_array(clients_array);
     }
 
     // //Removing public message queue
