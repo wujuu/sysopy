@@ -30,7 +30,6 @@ struct semaphore *init_semaphore(char *name){
     new_sem -> id = id;
 
 
-    union semun sem_info;
     struct sembuf *semoparray = malloc(sizeof(struct sembuf));
 
     semoparray[0].sem_op = 1;
@@ -67,7 +66,6 @@ struct semaphore *open_semaphore(char* name){
 }
 
 void post_semaphore(struct semaphore *sem){
-    union semun sem_info;
     struct sembuf *semoparray = malloc(sizeof(struct sembuf));
 
     //RETURNING RESOURCES
@@ -81,7 +79,6 @@ void post_semaphore(struct semaphore *sem){
 }
 
 void wait_semaphore(struct semaphore *sem){
-    union semun sem_info;
     struct sembuf *semoparray = malloc(sizeof(struct sembuf));
 
     //REQUESTING AND POSSIBLY WAITING FOR RESOURCES

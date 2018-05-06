@@ -6,6 +6,7 @@
         "types.h": "c",
         "client_server.h": "c",
         "shm.h": "c",
-        "single_sem.h": "c"
+        "single_sem.h": "c",
+        "time.h": "c"
     }
 }
