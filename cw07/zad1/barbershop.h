@@ -9,6 +9,8 @@ struct barbershop{
     struct clients_queue queue;
     int max_clients;
     //int clients_waiting INSIDE CLIENTS QUEUE
+    pid_t barber_pid;
+    struct client passed_client;
 };
 
 

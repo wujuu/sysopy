@@ -24,5 +24,5 @@ void print_time_msg(char *msg){
     struct timespec tp;
     clock_gettime(clk_id, &tp);
 
-    printf("%lld.%.9ld: %s\n", (long long)tp.tv_sec, tp.tv_nsec, msg);   
+    printf("%lld.%.9ld: %s", (long long)tp.tv_sec, tp.tv_nsec, msg);
 }
