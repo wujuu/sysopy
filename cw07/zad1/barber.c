@@ -48,9 +48,7 @@ void sigusr1_handler(int sig_no){
 }
 
 
-void fall_asleep(){
-    print_time_msg("Barber falling asleep...\n");
-}
+
 
 void cut_moustache(struct client *shaven_client){
     pid_t shaven_pid = shaven_client -> pid;
@@ -86,57 +84,78 @@ int main(int argc, char **argv){
     //INITALIZING SEMAPHORE
     barbershop_sem = init_semaphore(home);
 
-    struct client current_client;
+
     //INITIALIZING SHARED BARBERSHOP STRUCTURE
     wait_semaphore(barbershop_sem);
-
     barbershop_pointer = shmat(shm_id, NULL, 0);
+
+
     *barbershop_pointer = init_barbershop(max_clients);
 
-    //shmdt(barbershop_pointer);
+    //FOR MAIN LOOP
+    struct client current_client;
 
-    
-    //MAIN BARBER LOOP GOES HERE
+
+    //MAIN BARBER LOOP
     while(1){
-        fall_asleep();
+        print_time_msg("Barber falling asleep...\n");
+
 
         shmdt(barbershop_pointer);
-        post_semaphore(barbershop_sem);
+        post_semaphore(barbershop_sem); //STATE CHECK WINDOW BEGIN
 
         //WAITING FOR WAKEUP SIGNAL
         sigsuspend(&null_block);
 
-        //getting client
-        wait_semaphore(barbershop_sem);
+        wait_semaphore(barbershop_sem); //STATE CHECK WINDOW END
         barbershop_pointer = shmat(shm_id, NULL, 0);
+
+
+        //GETTING IMMEDIATE CLIENT
         current_client = barbershop_pointer -> passed_client;
+
+
         shmdt(barbershop_sem);
-        post_semaphore(barbershop_sem);
+        post_semaphore(barbershop_sem); //STATE CHECK WINDOW BEGIN
 
-
+        //CUTTING IMMEDIATE CLIENT
         cut_moustache(&current_client);
 
-        wait_semaphore(barbershop_sem);
-
-        kill(current_client.pid, SIGUSR2);
-
+        wait_semaphore(barbershop_sem); //STATE CHECK WINDOW END
         barbershop_pointer = shmat(shm_id, NULL, 0);
 
+
+
+        //SIGNAL CLIENT THAT HE'S DONE SHAVING
+        kill(current_client.pid, SIGUSR2);
+
+        
+        //DO QUEUE OF CLIENTS
         while(1){
             if(!is_empty(barbershop_pointer -> queue)){
+                
+                //GETTING QUEUE CLIENT
                 current_client = pop_clients_queue(&(barbershop_pointer -> queue));
+
+                print_time_msg("Inviting client from queue ");
+                printf("%i...\n", current_client.pid);
+                
+
+
                 shmdt(barbershop_pointer);
-                post_semaphore(barbershop_sem);
+                post_semaphore(barbershop_sem); //STATE CHECK WINDOW BEGIN
 
                 cut_moustache(&current_client);
-
-                wait_semaphore(barbershop_sem);
-
-                kill(current_client.pid, SIGUSR2);
-
+        
+                wait_semaphore(barbershop_sem); //STATE CHECK WINDOW END
                 barbershop_pointer = shmat(shm_id, NULL, 0);
 
-            } else {
+
+                //SIGNAL CLIENT THAT HE'S DONE SHAVING
+                kill(current_client.pid, SIGUSR2);
+
+                
+            } else { // IF QUEUE EMPTY THEN GO TO SLEEP -> CHANGE STATE AND EXIT QUEUE LOOP
                 barbershop_pointer -> state = 0;
                 break;
             }
