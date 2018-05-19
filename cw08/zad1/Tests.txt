@@ -1,0 +1,80 @@
+threads: 1, filter ./filters/f4.filter:
+USER TIME: 0.034826
+SYSTEM TIME: 0.000000
+
+threads: 1, filter ./filters/f8.filter:
+USER TIME: 0.130255
+SYSTEM TIME: 0.000000
+
+threads: 1, filter ./filters/f16.filter:
+USER TIME: 0.514853
+SYSTEM TIME: 0.000000
+
+threads: 1, filter ./filters/f32.filter:
+USER TIME: 2.042824
+SYSTEM TIME: 0.000000
+
+threads: 1, filter ./filters/f64.filter:
+USER TIME: 8.435319
+SYSTEM TIME: 0.011782
+
+threads: 2, filter ./filters/f4.filter:
+USER TIME: 0.034153
+SYSTEM TIME: 0.000000
+
+threads: 2, filter ./filters/f8.filter:
+USER TIME: 0.130135
+SYSTEM TIME: 0.000000
+
+threads: 2, filter ./filters/f16.filter:
+USER TIME: 0.532053
+SYSTEM TIME: 0.000000
+
+threads: 2, filter ./filters/f32.filter:
+USER TIME: 2.082497
+SYSTEM TIME: 0.000000
+
+threads: 2, filter ./filters/f64.filter:
+USER TIME: 8.548812
+SYSTEM TIME: 0.015978
+
+threads: 4, filter ./filters/f4.filter:
+USER TIME: 0.039668
+SYSTEM TIME: 0.000000
+
+threads: 4, filter ./filters/f8.filter:
+USER TIME: 0.137564
+SYSTEM TIME: 0.000013
+
+threads: 4, filter ./filters/f16.filter:
+USER TIME: 0.542967
+SYSTEM TIME: 0.000000
+
+threads: 4, filter ./filters/f32.filter:
+USER TIME: 2.137526
+SYSTEM TIME: 0.000000
+
+threads: 4, filter ./filters/f64.filter:
+USER TIME: 8.566309
+SYSTEM TIME: 0.011935
+
+threads: 8, filter ./filters/f4.filter:
+USER TIME: 0.039382
+SYSTEM TIME: 0.000004
+
+threads: 8, filter ./filters/f8.filter:
+USER TIME: 0.137575
+SYSTEM TIME: 0.000018
+
+threads: 8, filter ./filters/f16.filter:
+USER TIME: 0.541134
+SYSTEM TIME: 0.000000
+
+threads: 8, filter ./filters/f32.filter:
+USER TIME: 2.114286
+SYSTEM TIME: 0.011981
+
+threads: 8, filter ./filters/f64.filter:
+USER TIME: 8.540674
+SYSTEM TIME: 0.000000
+

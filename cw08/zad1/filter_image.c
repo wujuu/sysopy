@@ -5,6 +5,10 @@
 #include <math.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+
+#include "filter_image.h"
 
 //GLOBAL ARRAYS AND SIZES FOR THREADS
 int **input = NULL;
@@ -13,13 +17,6 @@ int width = 0, height = 0;
 
 double **filter = NULL;
 int filter_size = 0;
-
-
-
-struct thread_info{
-    int start_index, end_index;
-};
-
 
 
 int max(int a, int b){
@@ -51,12 +48,13 @@ void read_pgm(const char* file_name, int ***output_table, int *output_width, int
     FILE *fp = open_input(file_name);
     char *buff = NULL;
     size_t len = 0;
+    ssize_t read;
 
     //P2 TOKEN
-    getline(&buff, &len, fp);
+    read = getline(&buff, &len, fp);
 
     //WIDTH AND height
-    getline(&buff, &len, fp);
+    read = getline(&buff, &len, fp);
 
     *output_width = atoi(strsep(&buff, " "));
     *output_height = atoi(strsep(&buff, " "));
@@ -70,7 +68,7 @@ void read_pgm(const char* file_name, int ***output_table, int *output_width, int
     }
 
     //MAX VALUE OF
-    getline(&buff, &len, fp);
+    read = getline(&buff, &len, fp);
 
     // printf("%s\n", buff);
 
@@ -78,7 +76,7 @@ void read_pgm(const char* file_name, int ***output_table, int *output_width, int
     int i = 0, j = 0;
     char *tmp;
 
-    while(getline(&buff, &len, fp) != -1){
+    while((read = getline(&buff, &len, fp)) != -1){
         while((tmp = strsep(&buff, " "))){
             if(strcmp(tmp, "") != 0 && strcmp(tmp, "\r\n") && strcmp(tmp, "\n")!= 0){
                 (*output_table)[i][j] = atoi(tmp);
@@ -98,9 +96,10 @@ void read_filter(const char* file_name, double ***filter_table, int *filter_size
     FILE *fp = open_input(file_name);
     char *buff = NULL;
     size_t len = 0;
+    ssize_t read;
 
     //FILTER SIZE
-    getline(&buff, &len, fp);
+    read = getline(&buff, &len, fp);
     (*filter_size) = atoi(buff);
 
     //ALLOCATING PROPER FILTER SIZE
@@ -113,7 +112,7 @@ void read_filter(const char* file_name, double ***filter_table, int *filter_size
     int i = 0, j = 0;
     char *tmp;
 
-    while(getline(&buff, &len, fp) != -1){
+    while((read = getline(&buff, &len, fp)) != -1){
         while((tmp = strsep(&buff, " "))){
             if(strcmp(tmp, "") != 0 && strcmp(tmp, "\n") != 0){
                 (*filter_table)[i][j] = atof(tmp);
@@ -232,14 +231,7 @@ struct thread_info *divide_work(int threads_amount){
     return thread_infos;
 }
 
-int main(int argc, char **argv){
-
-    //READING USER INPUT
-    int threads_amount = atoi(argv[1]);
-    const char *input_file = argv[2];
-    const char *filter_file = argv[3];
-    const char *output_file = argv[4];
-
+void filter_image(int threads_amount, const char *input_file, const char *filter_file, const char *output_file){
     //READING INPUT AND FILTER FILES
     read_pgm(input_file, &input, &width, &height);
     read_filter(filter_file, &filter, &filter_size);
@@ -269,19 +261,80 @@ int main(int argc, char **argv){
 
     // WRITING TO OUTPUT FILE
     write_to_file(output_file);
-
-
-    // CLEANING UP BUFFERS
-    // for(int i = 0; i < height; ++i){
-    //     free(output[i]);
-    // }
-
-    // free(output);
-
-    // for(int i = 0; i < threads_amount; ++i){
-    //     free(&threads[i]);
-    //     free(&thread_infos[i]);
-    // }
-
-    exit(0);
 }
+
+
+// int main(){
+
+//     //READING USER INPUT
+//     int test_threads[5] = {1, 2, 4, 8};
+//     char *f4 = "./filters/f4.filter";
+//     char *f8 = "./filters/f8.filter";
+//     char *f16 = "./filters/f16.filter";
+//     char *f32 = "./filters/f32.filter";
+//     char *f64 = "./filters/f64.filter";
+//     char *test_filters[5] = {f4, f8, f16, f32, f64};
+//     char *input_file = "./images/dla.ascii.pgm";
+
+//     FILE *fp = fopen("Tests.txt", "w");
+
+
+//     //READING INPUT AND FILTER FILES
+//     read_pgm(input_file, &input, &width, &height);
+
+//     //ALLOCATING OUTPUT
+//     output = malloc(height * sizeof(int*));
+
+//     for(int i = 0; i < height; i++)
+//         output[i] = malloc(width * sizeof(int));
+
+
+
+//     struct rusage start;
+//     struct rusage end;
+
+//     for(int threads_amount = 0; threads_amount < 4; threads_amount++){
+//         for(int t_filter = 0; t_filter < 5; t_filter++){
+//             read_filter(test_filters[t_filter], &filter, &filter_size);
+
+//             //ALLOCATING THREAD ID ARRAY
+//             pthread_t *threads = malloc(test_threads[threads_amount] * sizeof(pthread_t));
+
+//             //DIVIDING WORK
+//             struct thread_info *thread_infos = divide_work(test_threads[threads_amount]);
+
+  
+//             getrusage(RUSAGE_SELF, &start);
+
+//             //SCHDULING THREADS
+//             for(int i = 0; i < test_threads[threads_amount]; i++)
+//                 pthread_create(&threads[i], NULL, &process_chunk, &thread_infos[i]);
+
+
+//             //WAITING FOR THREADS TO JOIN THE MAIN THREAD
+//             for(int i = 0; i < test_threads[threads_amount]; i++)
+//                 pthread_join(threads[i], NULL);
+  
+//             getrusage(RUSAGE_SELF, &end);
+
+
+//             double u_time_sec = (double) (end.ru_utime.tv_sec - start.ru_utime.tv_sec);
+//             double u_time_usec = ((double) (end.ru_utime.tv_usec - start.ru_utime.tv_usec)) / 1000000;
+
+//             double s_time_sec = (double) (end.ru_stime.tv_sec - start.ru_stime.tv_sec);
+//             double s_time_usec = ((double) (end.ru_stime.tv_usec - start.ru_stime.tv_usec)) / 1000000;
+
+
+//             fprintf(fp, "threads: %i, filter %s:\n", test_threads[threads_amount], test_filters[t_filter]);
+//             fprintf(fp, "USER TIME: %f\n", u_time_sec + u_time_usec);
+//             fprintf(fp, "SYSTEM TIME: %f\n\n", s_time_sec + s_time_usec);
+
+        
+//         }
+//     }
+
+//     fclose(fp);
+    
+
+//     exit(0);
+// }
