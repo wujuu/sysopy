@@ -145,7 +145,7 @@ void *process_chunk(void *void_info){
                 for(int l = 0; l < filter_size; l++){
 
                     int x = min(height - 1, max(0, i - tmp + k));
-                    int y = min(width- 1, max(0, j - tmp + l));
+                    int y = min(width - 1, max(0, j - tmp + l));
 
                     filter_val += ((double) input[x][y]) * filter[k][l];
                 }
