@@ -9,22 +9,16 @@
 #include <fcntl.h>
 
 int main(){
-    // INITIALIZING CLIENTS ARRAY
-    // struct client *clients[MAX_CLIENTS];
-    // for(int i = 0; i < MAX_CLIENTS; i++) clients[i] = NULL;
+    struct sockaddr_un sa;
 
-    // interpreter();
-
-
-    struct sockaddr_in sa;
     int socket_fd, client_socket_fd;
     char buff[128];
 
-    sa.sin_family = AF_INET;
-    sa.sin_port = htons(50000);
-    sa.sin_addr.s_addr = INADDR_LOOPBACK;
+    sa.sun_family = AF_UNIX;
+    strcpy(sa.sun_path, "some_socket");
 
-    socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+    socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+
 
     bind(socket_fd, (struct sockaddr *) &sa, sizeof(sa));
 

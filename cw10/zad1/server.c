@@ -4,23 +4,21 @@
 #include <ctype.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <pthread.h>
+#include <sys/select.h>
+#include <unistd.h>
+#include <time.h>
+#include <signal.h>
+#include "info.h"
 
 
-#define MAX_CLIENTS 4
-#define MAX_CLIENT_NAME_LENGTH 8
+//global clients array
+struct client *clients_array[MAX_CLIENTS];
 
-#define MAX_TASK_NAME_LENGTH 16
+int public_socket_fd = -1;
+int highest_fd = 0;
 
-struct client{
-    char name[MAX_CLIENT_NAME_LENGTH];
-    int socket_fd;
-};
-
-struct task{
-    char task_name[MAX_TASK_NAME_LENGTH];
-    int x, y;
-};
-
+// struct task tasks[MAX_TASKS];
 
 //CLIENT FUNCTIONS
 struct client *init_client(char *client_name){
@@ -34,7 +32,7 @@ struct client *init_client(char *client_name){
     return NULL;    
 }
 
-int is_full(struct client *clients_array[]){
+int is_full(){
     for(int i = 0; i < MAX_CLIENTS; i++)
         if(clients_array[i] == NULL)
             return 0;
@@ -42,8 +40,8 @@ int is_full(struct client *clients_array[]){
     return 1;
 }
 
-int find_free_index(struct client *clients_array[]){
-    if(!is_full(clients_array))
+int find_free_index(){
+    if(!is_full())
         for(int i = 0; i < MAX_CLIENTS; i++)
             if(clients_array[i] == NULL)
                 return i;
@@ -51,8 +49,8 @@ int find_free_index(struct client *clients_array[]){
     return -1;
 }
 
-int insert_client(struct client *clients_array[], struct client *new_client){
-    int free_index = find_free_index(clients_array);
+int insert_client(struct client *new_client){
+    int free_index = find_free_index();
 
     if(free_index != -1){
         clients_array[free_index] = new_client;
@@ -62,23 +60,46 @@ int insert_client(struct client *clients_array[], struct client *new_client){
     return -1;
 }
 
-struct client *get_client_by_name(struct client *clients_array[], char *name){
+struct client *get_client_by_fd(int fd){
     for(int i = 0; i < MAX_CLIENTS; i++)
-        if(clients_array[i] != NULL && (strcmp(name, clients_array[i] -> name)) == 0)
+        if(clients_array[i] != NULL && clients_array[i] -> socket_fd == fd)
             return clients_array[i];
     
     return NULL;
 }
 
-int delete_client_by_name(struct client *clients_array[], char *name){
+int delete_client_by_fd(int fd){
     for(int i = 0; i < MAX_CLIENTS; i++)
-        if(clients_array[i] != NULL && (strcmp(name, clients_array[i] -> name)) == 0){
+        if(clients_array[i] != NULL && clients_array[i] -> socket_fd == fd){
             free(clients_array[i]);
             clients_array[i] = NULL;
             return 0;
         }
     
     return -1;
+}
+
+struct client *get_random_client(){
+    int active_clients = 0;
+
+    for(int i = 0; i < MAX_CLIENTS; i++)
+        if(clients_array[i] != NULL)
+            active_clients++;
+
+    int rand_client_num = rand() % active_clients + 1;
+
+    int rand_client_counter = 0;
+
+    for(int i = 0; i < MAX_CLIENTS; i++){
+        if(clients_array[i] != NULL){
+            rand_client_counter++;
+            if(rand_client_counter == rand_client_num)
+                return clients_array[i];
+        }
+            
+    }
+
+    return NULL;
 }
 
 void print_client(struct client *client){
@@ -89,7 +110,7 @@ void print_client(struct client *client){
     printf("\n");
 }
 
-void print_clients(struct client *clients_array[]){
+void print_clients(){
     for(int i = 0; i < MAX_CLIENTS; i++){
         printf("%i: ", i);
         print_client(clients_array[i]);
@@ -98,62 +119,9 @@ void print_clients(struct client *clients_array[]){
 }
 
 //TASK FUNCTIONS
-char *to_upper_case(char* string){
-    char* upper_string = malloc(strlen(string));
-    strcpy(upper_string, string);
-
-    for(int i = 0; i < strlen(string); i++) upper_string[i] = toupper(string[i]);
-
-    return upper_string;
-}
-
-int is_valid_num(char* string){
-    for(int i = 0; i < strlen(string); i++) 
-        if ((string[i] < '0' || string[i] > '9') && (string[i] != '\n'))
-            return 0;
-
-    return 1;
-}
-
-struct task *parse_task(char* input){
-    char* upper_input = to_upper_case(input);
-    char *tmp = NULL;
-
-    struct task *new_task = malloc(sizeof(struct task));
-
-
-    //TASK STRING       
-    tmp = strsep(&upper_input, " ");
-    if(strcmp(tmp, "ADD") == 0 || strcmp(tmp, "SUB") == 0 || strcmp(tmp, "MUL") == 0 || strcmp(tmp, "DIV") == 0)
-        strcpy(new_task -> task_name, tmp);
-    else
-        return NULL;
-    
-    //X OPERAND
-    tmp = strsep(&upper_input, " ");
-    if(is_valid_num(tmp))
-        new_task -> x = atoi(tmp);
-    else
-        return NULL;
-
-    //Y OPERAND
-    tmp = strsep(&upper_input, " ");
-    if(is_valid_num(tmp))
-        new_task -> y = atoi(tmp);
-    else
-        return NULL;
-
-    
-    return new_task;
-}
-
-void print_task(struct task *input_task){
-    if(input_task != NULL)
-        printf("task: %s, x: %i, y: %i\n", input_task -> task_name, input_task -> x, input_task -> y);
-}
 
 //PROPER TASK FORMAT(SINGLE SPACES):ADD 12333 222
-void interpreter(){
+void *interpreter(void *arg){
     struct task *current_task = NULL;
 
     char *user_input = NULL;
@@ -165,31 +133,121 @@ void interpreter(){
 
         current_task = parse_task(user_input);
 
-        if(current_task != NULL)
-            print_task(current_task);
+        if(current_task != NULL){
+            char task_buff[128];
+
+            task_to_string(current_task, task_buff);
+
+            struct client *rand_client = get_random_client();
+
+            if(rand_client == NULL){
+                printf("ni mo komu\n");
+                continue;
+            }
+
+            int client_socket_fd = rand_client -> socket_fd;
+
+            write(client_socket_fd, task_buff, 128);
+        }
+        else
+            printf("Error: invalid task name...\n");
         
-    } while(strcmp(user_input, "exit\n") != 0);
+    } while(1);
+
+    return NULL;
+}
+
+
+void *recieve_responses(void *arg){
+    fd_set set, read_set;
+    FD_ZERO(&set);
+    FD_SET(public_socket_fd, &set);
+
+    char buff[128];
+    ssize_t nread;
+
+    while(1){
+        read_set = set;
+
+        select(highest_fd + 1, &read_set, NULL, NULL, NULL);
+
+        for(int fd = 0; fd <= highest_fd; fd++){
+            if(FD_ISSET(fd, &read_set)){
+
+                if(fd == public_socket_fd){
+                    int client_socket_fd = accept(public_socket_fd, NULL, 0);
+                    if(client_socket_fd > highest_fd)
+                        highest_fd = client_socket_fd;
+
+                    FD_SET(client_socket_fd, &set);
+
+                    struct client *new_client = init_client("asd");
+                    new_client -> socket_fd = client_socket_fd;
+
+                    insert_client(new_client);
+
+                    printf("Client number: %i is ready to work!\n", client_socket_fd);
+
+                }
+                else {
+                    nread = read(fd, buff, sizeof(buff));
+                    
+                    if(nread == 0) {
+                        FD_CLR(fd, &set);
+                        delete_client_by_fd(fd);
+
+                        if(fd == highest_fd) highest_fd--;
+
+                        close(fd);
+                    } else {
+                        printf("I got answer from %i: %s\n", fd, buff);
+                        write(fd, "I got your message!\n", sizeof("I got your message!"));
+                    }
+                }
+            }
+        }
+    }
+
+    return NULL;
+
+
 }
 
 
 int main(){
+    
+    srand(time(NULL));
+
+    int max_listen_queue = 10;
+
     // INITIALIZING CLIENTS ARRAY
-    // struct client *clients[MAX_CLIENTS];
-    // for(int i = 0; i < MAX_CLIENTS; i++) clients[i] = NULL;
-
-    // interpreter();
-
+    for(int i = 0; i < MAX_CLIENTS; i++) clients_array[i] = NULL;
+    
 
     struct sockaddr_un sa;
 
-    strcpy(sa.sun_path, "MySocket");
+    strcpy(sa.sun_path, "public_server_socket");
     sa.sun_family = AF_UNIX;
 
+    public_socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if(public_socket_fd > highest_fd)
+        highest_fd = public_socket_fd;
 
-    char txt[10];
-    scanf("%s", txt);
+    bind(public_socket_fd, (struct sockaddr *) &sa, sizeof(sa));
 
-    
+    listen(public_socket_fd, max_listen_queue);
+
+
+    pthread_t intepreter_thread, responses_thread;
+
+    pthread_create(&intepreter_thread, NULL, interpreter, NULL);
+    pthread_create(&responses_thread, NULL, recieve_responses, NULL);
+
+    pthread_join(intepreter_thread, NULL);
+    pthread_join(intepreter_thread, NULL);
+
+
+    close(public_socket_fd);
 
 
     return 0;
