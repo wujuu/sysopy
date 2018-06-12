@@ -8,6 +8,7 @@
 #include <signal.h>
 #include <fcntl.h>
 #include "client_server.h"
+#include <sys/stat.h>
 
 int public_queue_id;
 int private_queue_id;

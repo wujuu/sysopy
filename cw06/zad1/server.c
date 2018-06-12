@@ -8,6 +8,7 @@
 #include <time.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <sys/stat.h>
 #include "client_server.h"
 
 int emergency = 0;
